@@ -70,6 +70,7 @@ COPY --from=build /app/.output /app
 COPY --from=build /app/server/database/migrations /app/server/database/migrations
 # libsql (https://github.com/nitrojs/nitro/issues/3328)
 RUN cd /app/server && \
+	rm -rf node_modules package-lock.json && \
     npm install --no-save --legacy-peer-deps libsql && \
     npm cache clean --force
 # cli
