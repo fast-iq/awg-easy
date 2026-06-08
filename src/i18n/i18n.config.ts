@@ -17,15 +17,16 @@ import id from './locales/id.json';
 export default defineI18nConfig(() => ({
   legacy: false,
   fallbackLocale: 'en',
-  // Disable strict mode to prevent deepCopy errors with locale merging
-  silentTranslationWarn: true,
-  silentFallbackWarn: true,
-  // Use shallow merging to avoid deepCopy issues
-  mergeFallbackMessage: true,
-  // Prevent deepCopy errors by disabling complex locale operations
-  postProcessing: false,
-  // Use shallow merging to avoid deepCopy issues with complex objects
-  inheritLocale: false,
+  
+  // ✅ Новые опции для vue-i18n v9+
+  missingWarn: false,           // Вместо silentTranslationWarn
+  fallbackWarn: false,          // Вместо silentFallbackWarn
+  
+  // ✅ Отключаем сложные операции, которые могут вызывать deepCopy ошибки
+  fallbackFormat: false,
+  pluralization: false,
+  
+  // ✅ Простая конфигурация сообщений
   messages: {
     en,
     pl,
