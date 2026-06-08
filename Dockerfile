@@ -110,7 +110,7 @@ ENV INSECURE=false
 ENV INIT_ENABLED=false
 ENV DISABLE_IPV6=false
 
-LABEL org.opencontainers.image.source=https://github.com/evoll/awg-easy
+LABEL org.opencontainers.image.source=https://github.com/fast-iq/awg-easy
 
 # Run Web UI
 CMD ["/usr/bin/dumb-init", "node", "server/index.mjs"]
