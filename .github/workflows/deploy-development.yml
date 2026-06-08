@@ -115,7 +115,7 @@ jobs:
         with:
           images: |
             ghcr.io/fast-iq/awg-easy
-            codeberg.org/fast-iq/awg-easy
+            #codeberg.org/fast-iq/awg-easy
           flavor: |
             latest=true
           tags: |
