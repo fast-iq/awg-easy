@@ -24,13 +24,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: "lts/jod"
+          node-version: "lts/*"
           check-latest: true
           cache: "pnpm"
 
       - name: Check docs formatting
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm format:check:docs
 
   lint:
@@ -64,5 +64,5 @@ jobs:
       - name: pnpm ${{ matrix.command }}
         run: |
           cd src
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm ${{ matrix.command }}

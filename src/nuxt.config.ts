@@ -29,6 +29,9 @@ export default defineNuxtConfig({
     //   localeDetector: './localeDetector.ts',
     // },
     // Disable compilation to prevent build-time locale merging issues
+	experimental: {
+		localeDetector: './localeDetector.ts',
+	},
     compilation: {
       strictMessage: false,
       escapeHtml: false,
