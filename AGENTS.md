@@ -69,8 +69,17 @@
     - EOF-newline: `eslint.config.mjs`, `i18n/i18n.config.ts`, `server/api/interface.get.ts`, `interface/schema.ts`.
     - Убраны неиспользуемые `eslint-disable`: `Database.ts` (import/no-mutable-exports), `awg-params.ts` ×2, `interface/types.ts` (no-unused-vars).
     - **Проверено локально**: скачал Node 24.11.1 в `%TEMP%`, `pnpm install` + `format:check` ✅ + `lint` ✅ (0 ошибок).
-    - **typecheck падает — это ПРЕСУЩЕСТВУЮЩИЕ ошибки** (проверено на stash-копии до форматирования, тот же список): `Update.vue` latestRelease possibly null ×3, `useSubmit.ts`/`login.vue` TS2321 excessive stack depth (Nuxt route types), `admin/interface.vue:259` Expected 1 arguments got 0, `i18n.config.ts` TS2740 (локали de/es/... удалены в `ba3019e`, но тип ждёт все), `nuxt.config.ts:129` optimizeTranslationDirective unknown, `sqlite.ts:117` AwgObfuscationParams ≠ InterfaceUpdateType. **Не чинить вместе с форматированием** — отдельные задачи.
     - **Правило**: одна и та же операция >5 раз = что-то не так, менять подход (зацикливался на чтении git show; решил скачиванием Node).
+
+### 2026-09-26: фикс typecheck (все ошибки ушли, CI зелёный)
+
+13. **Все 8 typecheck-ошибок исправлены** (commit `dabfc89`):
+    - `Update.vue` — в `v-if` добавлен guard `globalStore.information?.latestRelease &&` (3× TS18047 possibly null).
+    - `useSubmit.ts` — **убраны generics nitropack** (`NitroFetchRequest`/`NitroFetchOptions`/`TypedInternalResponse`) — они давали TS2321 "Excessive stack depth" на КАЖДОМ из 22 call sites (login.vue, me.vue, admin/* и т.д.). Заменены на простые типы `(url: any, options: any, opts: SubmitOpts)`. Runtime-поведение не изменилось.
+    - `admin/interface.vue:259` — `_restartInterface()` → `_restartInterface(undefined)` (TS2554).
+    - `nuxt.config.ts` — удалены 13 локалей (de/es/it/fr/ko/ru/uk/zh-CN/zh-HK/pl/pt-BR/tr/bn/id) без JSON-файлов → фикс TS2740 в `i18n.config.ts`; удалён неизвестный `bundle.optimizeTranslationDirective` (TS2353, опции нет в @nuxtjs/i18n 10.x).
+    - `sqlite.ts:117` — добавлен метод `updateAwgParams(AwgObfuscationParams)` в `InterfaceService` (partial-обновление только AWG-полей), вместо `update(awgParams)` который ждал полный `InterfaceUpdateType` (TS2345).
+    - **Проверено локально**: typecheck ✅ exit 0, lint ✅ 0 ошибок 0 warn, format:check ✅.
 
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
