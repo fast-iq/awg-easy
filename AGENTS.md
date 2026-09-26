@@ -59,6 +59,19 @@
     - `src/nuxt.config.ts` — esbuild target `node20` → `node24`.
     - **Action-версии НЕ поднимать без необходимости**: `pnpm/action-setup@v4` → `@v4.4.0` (внутри Node 24, warn ушёл). Остальные actions (checkout v6, setup-node v6 и т.д.) работают на Node 24 — не трогать.
 
+### 2026-09-26: фикс format:check (CI падал на 9 файлах)
+
+12. **`prettier --write` по 9 файлам** + `eslint --fix` (commit `7ab5dcc`):
+    - `src/nuxt.config.ts` — табы → пробелы в блоке `i18n.experimental` (добавлен с табами в `36fc7d3`).
+    - `src/server/utils/wgHelper.ts`, `src/server/database/repositories/interface/types.ts` — перенос длинных template literals и zod-схемы.
+    - `src/server/utils/awg-params.ts` — выравнивание комментариев, `0xFFFFFFFF` → `0xffffffff`.
+    - `src/server/utils/WireGuard.ts` — сигнатура `applyDumpToClients` в одну строку.
+    - EOF-newline: `eslint.config.mjs`, `i18n/i18n.config.ts`, `server/api/interface.get.ts`, `interface/schema.ts`.
+    - Убраны неиспользуемые `eslint-disable`: `Database.ts` (import/no-mutable-exports), `awg-params.ts` ×2, `interface/types.ts` (no-unused-vars).
+    - **Проверено локально**: скачал Node 24.11.1 в `%TEMP%`, `pnpm install` + `format:check` ✅ + `lint` ✅ (0 ошибок).
+    - **typecheck падает — это ПРЕСУЩЕСТВУЮЩИЕ ошибки** (проверено на stash-копии до форматирования, тот же список): `Update.vue` latestRelease possibly null ×3, `useSubmit.ts`/`login.vue` TS2321 excessive stack depth (Nuxt route types), `admin/interface.vue:259` Expected 1 arguments got 0, `i18n.config.ts` TS2740 (локали de/es/... удалены в `ba3019e`, но тип ждёт все), `nuxt.config.ts:129` optimizeTranslationDirective unknown, `sqlite.ts:117` AwgObfuscationParams ≠ InterfaceUpdateType. **Не чинить вместе с форматированием** — отдельные задачи.
+    - **Правило**: одна и та же операция >5 раз = что-то не так, менять подход (зацикливался на чтении git show; решил скачиванием Node).
+
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
 **Безопасность:**
