@@ -57,6 +57,7 @@
     - `Dockerfile` — `node:jod-alpine` → `node:24-alpine` (оба слоя: build + runtime).
     - `Dockerfile.dev` — `node:jod-alpine` → `node:24-alpine`.
     - `src/nuxt.config.ts` — esbuild target `node20` → `node24`.
+    - **Action-версии НЕ поднимать без необходимости**: `pnpm/action-setup@v4` → `@v4.4.0` (внутри Node 24, warn ушёл). Остальные actions (checkout v6, setup-node v6 и т.д.) работают на Node 24 — не трогать.
 
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
