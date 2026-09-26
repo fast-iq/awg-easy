@@ -29,6 +29,7 @@
 - `vue: "latest"` в package.json — фиксировать на конкретную версию при обновлениях.
 - pnpm override: `rollup: 4.50.0` — не удалять без проверки сборки.
 - Node.js не установлен локально (win32) — typecheck/lint/build можно запускать только в Docker или CI. Проверять изменения статически и через GitHub Actions.
+- **Node.js 24** — целевая версия во всех местах: CI (`node-version: "24"`), Dockerfile/Dockerfile.dev (`node:24-alpine`), esbuild target в `nuxt.config.ts` (`node24`). Node 20 депрекейтен в GitHub Actions (warn с сентября 2025).
 
 ## Успешные изменения
 
@@ -47,6 +48,15 @@
 8. **Ссылки evoll → fast-iq**: `src/server/plugins/manager.ts`, `src/app/components/Ui/Footer.vue` (2 ссылки), `src/app/components/Header/Update.vue` (+ префикс `v` в теге релиза).
 9. **`src/server/database/repositories/oneTimeLink/service.ts`** — OTP-ссылки: `Math.random()`+CRC32 → `crypto.randomBytes(16).toString('hex')` (128 бит энтропии). Удалён зависимость `crc-32` из package.json (была использована только здесь).
 10. **Мёртвый код удалён**: `validateAwgParams` в `src/server/utils/awg-params.ts` (валидация дублируется в zod-схеме `interface/types.ts`); `UI_CHART_TYPES` в `src/app/utils/chart.ts`; неиспользуемые иконки: ArrowRightCircle (внутри был баг — импортировал ArrowLeftCircleIcon), Stack, Warning, CheckCircle, Delete, ArrowInf, ArrowLeftCircle.
+
+### 2026-09-26: Node.js 24
+
+11. **Node.js 20 → 24** (депрекейшен Node 20 в GitHub Actions, warn `pnpm/action-setup@v4`):
+    - `.github/workflows/lint.yml` — `node-version: "lts/*"` → `"24"` (оба джоба: docs + lint).
+    - `.github/workflows/update-pnpm-lock.yml` — `node-version: "20"` → `"24"`.
+    - `Dockerfile` — `node:jod-alpine` → `node:24-alpine` (оба слоя: build + runtime).
+    - `Dockerfile.dev` — `node:jod-alpine` → `node:24-alpine`.
+    - `src/nuxt.config.ts` — esbuild target `node20` → `node24`.
 
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
