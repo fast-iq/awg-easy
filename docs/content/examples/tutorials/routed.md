@@ -17,7 +17,7 @@ To make use of our own IPv4/IPv6 addresses, run the container with the `network_
 ```yaml
 services:
     awg-easy:
-        image: ghcr.io/evoll/awg-easy:15
+        image: ghcr.io/fast-iq/awg-easy:15
         container_name: awg-easy
         network_mode: 'host'
         volumes:

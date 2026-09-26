@@ -95,86 +95,70 @@
     - `deploy-edge.yml`, `deploy.yml` — добавлен `continue-on-error: true` на шаг "Login to Codeberg" + закомментирован `codeberg.org/fast-iq/awg-easy` в `images` metadata-action (как уже было в `deploy-development.yml`).
     - Если понадобится пуш на Codeberg — задать секреты в Settings → Secrets и раскомментировать.
 
+### 2026-09-26: безопасность сессий + userId + миграции + сортировка + зависимости
+
+16. **Rate limiting на логин** (`src/server/utils/rateLimit.ts` — новый файл, `session.post.ts`): in-memory sliding window, 5 попыток/IP/15 мин → 429 + `Retry-After`. Без Redis (одиночный инстанс).
+17. **Session expiration** (`src/server/utils/session.ts`): `maxAge: sessionConfig.sessionTimeout` в `useWGSession` и `getWGSession` — сессия истекает на сервере всегда; "Remember me" теперь продлевает только lifetime cookie (admin-configurable, поле Session Timeout в Admin → General).
+18. **Timing attack в Basic auth** (`session.ts` + `password.ts`): для неизвестного пользователя выполняется dummy-verify argon2 (`DUMMY_ARGON2_HASH`) — время ответа не раскрывает существование username.
+19. **`userId: 1` → реальный user** (`client/service.ts`, `client/index.post.ts`, `setup/migrate.post.ts`): `create()` принимает `userId` (из `getCurrentUser().id`), `createFromExisting()` — опциональный `userId` (миграция атрибутирует первому/админ-пользователю).
+20. **Путь к миграциям** (`sqlite.ts`): `process.cwd()/server/database/migrations` → `path.join(__dirname, 'migrations')` через `fileURLToPath(import.meta.url)` — не зависит от cwd (в Docker `/app/server/database/migrations`).
+21. **Сортировка клиентов на бэкенде** (`WireGuard.ts`, `client/index.get.ts`, `ClientQuerySchema`, `stores/clients.ts`): query param `sort=asc|desc`, сортировка по name в `#attachDump()` (generic, тип клиента сохраняется); клиентский `sortByProperty` удалён из store и `math.ts`; `Sort.vue` без изменений (computed в searchParams + refresh).
+22. **Ссылки evoll → fast-iq**: 18 файлов (README, contributing.md, docs/**, ISSUE_TEMPLATE, mkdocs.yml, deploy.yml owner-checks, комментарий в nuxt.config.ts, error message в WireGuard.ts).
+23. **Обновление зависимостей** (`package.json` + lock): `vue: latest → ^3.5.43`, nuxt ^3.21.11, zod ^4.6.5, @nuxtjs/i18n ^10.6.0, pinia ^3.0.4, vue3-apexcharts ^1.11.1, otpauth ^9.5.2, semver ^7.8.5, @nuxt/eslint ^1.17.0, drizzle-kit ^0.31.11, prettier ^3.9.9, tsx ^4.23.15, vue-tsc ^3.3.11, @types/semver ^7.8.0. НЕ тронуто: drizzle-orm 0.44 (changelog breaking не проверен), @libsql/client 0.15, argon2, esbuild, citty, js-sha256, qr, is-cidr (major/0.x — рисковано).
+24. **`cli/build.js`** — плагин "make-all-packages-external" ломался на Windows (regex `[^\./]` матчит полный путь entry point → "entry point cannot be marked as external"). Заменён на явный список `external: [...]` (drizzle, libsql, citty и т.д.).
+25. **i18n проверено**: в бандл попадает только `en.json` (импорт в `i18n.config.ts`), остальные 14 локалей (~130 КБ) не грузятся — ок.
+26. **Dockerfile libsql через npm** — оставлено как есть: работает, native-бинарники libsql ставятся отдельно от pnpm осознанно (избегание pnpm dedupe для native). Не чинить без реальной проблемы.
+
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
 **Безопасность:**
 - ~~`oneTimeLink/service.ts:49` — OTP-ссылки через `Math.random()`+CRC32~~ — **исправлено 2026-09-26**: `crypto.randomBytes(16)`.
-- `session.ts` — нет rate limiting на `/api/session` (POST), есть TODO про timing attack при Basic auth.
-- `session.ts:15` — сессии без истечения срока (TODO: add session expiration); cookie maxAge только при rememberMe.
+- ~~`session.ts` — нет rate limiting на `/api/session` (POST), есть TODO про timing attack при Basic auth~~ — **исправлено 2026-09-26** (пункты 16, 18).
+- ~~`session.ts:15` — сессии без истечения срока~~ — **исправлено 2026-09-26** (пункт 17).
 
 **Баги:**
-- `client/service.ts:208,273` — `userId: 1` захардкожен (TODO: properly assign user id). Клиенты создаются не от имени текущего пользователя.
+- ~~`client/service.ts:208,273` — `userId: 1` захардкожен~~ — **исправлено 2026-09-26** (пункт 19).
 - ~~`client/[clientId]/index.get.ts:13` — `checkPermissions(result)` вызывается ДО проверки `if (!result)`~~ — **исправлено 2026-09-26** во всех 8 endpoint'ах `[clientId]`.
-- `WireGuard.ts:19` — БД на `file:/etc/wireguard/wg-easy.db`, а миграции ищутся через `process.cwd()` — хрупко при смене cwd.
-- `Dockerfile:72-75` — в финальный образ ставится `libsql` через npm (native), отдельно от pnpm — потенциальный источник проблем с бинарниками.
+- ~~`WireGuard.ts:19` — миграции через `process.cwd()`~~ — **исправлено 2026-09-26** (пункт 20).
+- `Dockerfile:72-75` — libsql через npm отдельно от pnpm — **оставлено как есть** (работает, осознанный выбор; см. пункт 26).
 
 **Оптимизации:**
-- ~~`WireGuard.ts` — `clients.find()` внутри `forEach` по dump = O(n²)`~~ — **исправлено 2026-09-26**: хелпер `applyDumpToClients()` с Map по publicKey.
+- ~~`WireGuard.ts` — `clients.find()` внутри `forEach` по dump = O(n²)`~~ — **исправлено 2026-09-26**: хелпер `applyDumpToClients()`.
 - `app/pages/index.vue:47` — поллинг `/api/client` раз в 1000 мс; есть TODO про websocket.
-- `stores/clients.ts` — сортировка на клиенте (TODO: move sort to backend); история графиков хранится в памяти браузера и теряется при перезагрузке.
-- i18n: все 15 локалей (~140 КБ) грузятся целиком; только en в бандле по умолчанию (`i18n.config.ts`), остальные — через lazy? Проверить, что другие локали не попадают в initial bundle.
-- ~~`release.ts` — semver без обработки префикса `v`, не-semver тег → 500~~ — **исправлено 2026-09-26**: стрип `v` + `valid()`.
+- ~~`stores/clients.ts` — сортировка на клиенте~~ — **исправлено 2026-09-26** (пункт 21). История графиков всё ещё теряется при перезагрузке (хранится в памяти браузера) — осознано, не баг.
+- ~~i18n: проверить initial bundle~~ — **проверено 2026-09-26**: только en.json в бандле (пункт 25).
+- ~~`release.ts` — semver без обработки префикса `v`~~ — **исправлено 2026-09-26**.
 
 **Дубли/мёртвый код:**
-- ~~`awg-params.ts` — `validateAwgParams` не используется~~ — **удалено 2026-09-26**.
-- ~~Неиспользуемые иконки: ArrowRightCircle, Stack, Warning, CheckCircle, Delete, ArrowInf, ArrowLeftCircle~~ — **удалены 2026-09-26**.
-- ~~`UI_CHART_TYPES` в `app/utils/chart.ts` не используется~~ — **удалено 2026-09-26**.
+- ~~`validateAwgParams`, иконки, `UI_CHART_TYPES`, `sortByProperty`~~ — **удалено 2026-09-26**.
 
-**Ссылки на старый репозиторий evoll/awg-easy (репо уже fast-iq):**
-- ~~`src/server/utils/release.ts:9` — API GitHub для `evoll/awg-easy`~~ — **исправлено 2026-09-26**.
-- ~~`src/server/plugins/manager.ts`, `app/components/Ui/Footer.vue`, `app/components/Header/Update.vue`~~ — **исправлено 2026-09-26**.
-- README, docs, ISSUE_TEMPLATE — ссылки ещё на evoll (не тронуто, косметика).
+**Ссылки на старый репозиторий evoll/awg-easy:**
+- ~~ВСЕ ссылки (src + README + docs + templates + workflows)~~ — **исправлено 2026-09-26** (пункт 22).
 
-## Обновление зависимостей (проверено 2026-09-26 через npm registry dist-tags)
-
-### Можно обновлять БЕЗОПАСНО (patch/minor в рамках текужого major):
-| Пакет | Сейчас | Можно до |
+### Осталось из таблицы зависимостей (не обновлено, намеренно):
+| Пакет | Сейчас | Почему не обновил |
 |---|---|---|
-| vue | `latest` (!) | зафиксировать на `^3.5.x` (latest = 3.5.43) |
-| nuxt | ^3.19.3 | ^3.21.11 (тег 3x) — major 4 не брать |
-| drizzle-orm | ^0.44.7 | 0.45.3 (minor, проверить breaking в changelog) |
-| zod | ^4.1.12 | ^4.6.5 |
-| @nuxtjs/i18n | ^10.2.0 | ^10.6.0 |
-| pinia | ^3.0.3 | ^3.x (4.0 не брать — major) |
-| @pinia/nuxt | ^0.11.2 | ^0.11.x (1.0 не брать без проверки) |
-| radix-vue | ^1.9.17 | актуально |
-| @vueuse/core, @vueuse/nuxt | ^14.0.0 | 15.0.0 — major, проверить |
-| @libsql/client | ^0.15.15 | 0.18.0 — minor в 0.x = потенциально breaking, проверить |
-| otpauth | ^9.4.1 | ^9.5.2 |
-| argon2 | ^0.44.0 | 0.45.1 — проверить (native) |
-| apexcharts | ^5.3.5 | 7.x — major, не брать |
-| vue3-apexcharts | ^1.10.0 | ^1.11.1 |
-| drizzle-kit | ^0.31.6 | ^0.31.11 |
-| esbuild | ^0.25.11 | 0.28.x — проверить (cli:build) |
-| eslint | ^9.38.0 | 9.x (10 не брать) |
-| typescript | ^5.9.3 | 5.x (7 не брать!) |
-| vue-tsc | ^3.1.3 | ^3.3.11 |
-| @nuxt/eslint | ^1.10.0 | ^1.17.0 |
-| citty | ^0.1.6 | 0.2.2 — проверить (cli) |
-| semver | ^7.7.3 | ^7.8.5 |
-| js-sha256 | ^0.11.1 | 1.x — major, проверить |
-| qr | ^0.5.2 | 0.7.0 — проверить API encodeQR |
-| cidr-tools | ^11.0.3 | 13.x — major, не брать без проверки |
-| ip-bigint | ^8.2.2 | 10.x — major, не брать |
-| is-cidr | ^6.0.1 | 7.x — major, проверить |
-| prettier (src) | ^3.7.4 | ^3.9.9 |
-| prettier-plugin-tailwindcss | ^0.7.1 | 0.8.1 — проверить (может переформатить) |
-| tsx | ^4.20.6 | ^4.23.15 |
-| @types/semver | ^7.7.1 | ^7.8.0 |
+| drizzle-orm | ^0.44.7 | 0.45 — minor в 0.x = потенциально breaking; проверить changelog + `drizzle-kit generate` перед апгрейдом |
+| @libsql/client | ^0.15.15 | 0.18 — то же самое, native-бинарники |
+| argon2 | ^0.44.0 | native, 0.45 проверить на альпине |
+| esbuild | ^0.25.11 | cli:build + nuxt; проверить target node24 |
+| citty | ^0.1.6 | 0.2 — API CLI может измениться |
+| js-sha256 | ^0.11.1 | major 1.x, API sha256() проверить |
+| qr | ^0.5.2 | 0.7 — API encodeQR проверить |
+| is-cidr | ^6.0.1 | major 7, ядро IP-логики |
+| prettier-plugin-tailwindcss | ^0.7.1 | 0.8 может переформатить весь проект |
 
-### НЕ обновлять:
+## Обновление зависимостей
+
+Выполнено 2026-09-26 (пункт 23): vue зафиксирован на `^3.5.43`, обновлены nuxt/zod/i18n/pinia/vue3-apexcharts/otpauth/semver/eslint-экосистема/prettier/tsx/vue-tsc/drizzle-kit. Проверено локально: typecheck ✅, lint ✅, format:check ✅, build ✅ (Node 24).
+
+### НЕ обновлять (см. таблицу выше "Осталось из таблицы зависимостей"):
 - nuxt → 4.x (major, breaking)
 - pinia → 4.x (major)
 - apexcharts → 7.x (major + vue3-apexcharts может не поддерживать)
 - typescript → 7.x (native tsc, breaking)
 - eslint → 10.x (major)
 - cidr-tools / ip-bigint → major (используются в ядре логики IP)
-
-### Порядок обновления:
-1. Зафиксировать `vue` на `^3.5.43`.
-2. Обновлять по одному пакету (или группами связанных), после каждого — `pnpm check:all` в Docker/CI.
-3. Для drizzle-orm 0.45 проверить, что миграции (`drizzle-kit generate`) не генерируют новый мигрейшн.
-4. После всех обновлений — полный `pnpm check:all` + docker build + ручной прогон setup (docker-compose.dev.yml).
 
 ## Неудачные изменения / ошибки
 

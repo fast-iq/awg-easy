@@ -94,7 +94,7 @@ class WireGuard {
     WG_DEBUG('Config synced successfully.');
   }
 
-  async getClientsForUser(userId: ID, filter?: string) {
+  async getClientsForUser(userId: ID, filter?: string, sort?: 'asc' | 'desc') {
     const wgInterface = await Database.interfaces.get();
 
     let dbClients;
@@ -104,19 +104,7 @@ class WireGuard {
       dbClients = await Database.clients.getForUser(userId);
     }
 
-    const clients = dbClients.map((client) => ({
-      ...client,
-      latestHandshakeAt: null as Date | null,
-      endpoint: null as string | null,
-      transferRx: null as number | null,
-      transferTx: null as number | null,
-    }));
-
-    // Loop WireGuard status
-    const dump = await wg.dump(wgInterface.name);
-    applyDumpToClients(clients, dump);
-
-    return clients;
+    return this.#attachDump(wgInterface, dbClients, sort);
   }
 
   async dumpByPublicKey(publicKey: string) {
@@ -130,7 +118,7 @@ class WireGuard {
     return clientDump;
   }
 
-  async getAllClients(filter?: string) {
+  async getAllClients(filter?: string, sort?: 'asc' | 'desc') {
     const wgInterface = await Database.interfaces.get();
 
     let dbClients;
@@ -140,6 +128,17 @@ class WireGuard {
       dbClients = await Database.clients.getAllPublic();
     }
 
+    return this.#attachDump(wgInterface, dbClients, sort);
+  }
+
+  /**
+   * Merge `wg show dump` data into clients and sort by name.
+   */
+  async #attachDump<T extends { name: string; publicKey: string }>(
+    wgInterface: InterfaceType,
+    dbClients: T[],
+    sort?: 'asc' | 'desc'
+  ) {
     const clients = dbClients.map((client) => ({
       ...client,
       latestHandshakeAt: null as Date | null,
@@ -148,9 +147,14 @@ class WireGuard {
       transferTx: null as number | null,
     }));
 
-    // Loop WireGuard status
     const dump = await wg.dump(wgInterface.name);
     applyDumpToClients(clients, dump);
+
+    clients.sort((a, b) =>
+      sort === 'desc'
+        ? b.name.localeCompare(a.name)
+        : a.name.localeCompare(b.name)
+    );
 
     return clients;
   }
@@ -288,7 +292,7 @@ if (OLD_ENV.PASSWORD || OLD_ENV.PASSWORD_HASH) {
   throw new Error(
     `
 You are using an invalid Configuration for awg-easy
-Please follow the instructions on https://evoll.github.io/awg-easy/latest/advanced/migrate/from-14-to-15/ to migrate
+Please follow the instructions on https://fast-iq.github.io/awg-easy/latest/advanced/migrate/from-14-to-15/ to migrate
 `
   );
 }

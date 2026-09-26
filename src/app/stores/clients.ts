@@ -33,6 +33,8 @@ export const useClientsStore = defineStore('Clients', () => {
 
   const searchParams = ref({
     filter: undefined as string | undefined,
+    // Backend sorts by name; direction follows the UI toggle.
+    sort: computed(() => (globalStore.sortClient ? 'asc' : 'desc')),
   });
 
   const { data: _clients, refresh: _refresh } = useFetch('/api/client', {
@@ -43,7 +45,7 @@ export const useClientsStore = defineStore('Clients', () => {
   // TODO: rewrite
   async function refresh({ updateCharts = false } = {}) {
     await _refresh();
-    let transformedClients = _clients.value?.map((client) => {
+    const transformedClients = _clients.value?.map((client) => {
       let avatar = undefined;
       if (client.name.includes('@') && client.name.includes('.')) {
         avatar = `https://gravatar.com/avatar/${sha256(client.name.toLowerCase().trim())}.jpg`;
@@ -125,15 +127,7 @@ export const useClientsStore = defineStore('Clients', () => {
       };
     });
 
-    // TODO: move sort to backend
-    if (transformedClients !== undefined) {
-      transformedClients = sortByProperty(
-        transformedClients,
-        'name',
-        globalStore.sortClient
-      );
-    }
-
+    // Sorting happens on the backend (see /api/client?sort=asc|desc).
     clients.value = transformedClients ?? null;
   }
 

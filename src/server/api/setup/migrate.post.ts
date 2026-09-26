@@ -38,6 +38,9 @@ export default defineSetupEventHandler('migrate', async ({ event }) => {
 
   const oldConfig = res.data;
 
+  // Migrated clients are attributed to the first (admin) user.
+  const adminUser = await Database.users.getAll().then((users) => users[0]);
+
   await Database.interfaces.updateKeyPair(
     oldConfig.server.privateKey,
     oldConfig.server.publicKey
@@ -68,6 +71,7 @@ export default defineSetupEventHandler('migrate', async ({ event }) => {
       ...clientConfig,
       ipv4Address: clientConfig.address,
       ipv6Address,
+      userId: adminUser?.id ?? 1,
     });
   }
 

@@ -52,7 +52,7 @@ The development workflow is the following:
 
 Pull requests are automatically tested against the CI and will be reviewed when tests pass. When your changes are validated, your branch is merged. CI builds the new `:edge` image on every push to the `main` branch and your changes will be included in the next version release.
 
-[docs-latest]: https://evoll.github.io/awg-easy/latest
-[github-file-readme]: https://github.com/evoll/awg-easy/blob/main/README.md
+[docs-latest]: https://fast-iq.github.io/awg-easy/latest
+[github-file-readme]: https://github.com/fast-iq/awg-easy/blob/main/README.md
 [commit]: https://help.github.com/articles/closing-issues-via-commit-messages/
 [gpg]: https://docs.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key

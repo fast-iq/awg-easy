@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/libsql';
 import { migrate as drizzleMigrate } from 'drizzle-orm/libsql/migrator';
 import { createClient } from '@libsql/client';
@@ -64,14 +66,11 @@ export type DBServiceType = DBService;
 async function migrate() {
   try {
     DB_DEBUG('Migrating database...');
-    // Use absolute path to avoid issues with working directory
-    const path = await import('path');
-    const migrationsPath = path.join(
-      process.cwd(),
-      'server',
-      'database',
-      'migrations'
-    );
+    // Resolve relative to this file so the path is stable regardless of
+    // process.cwd(). In the Docker image this resolves to
+    // /app/server/database/migrations (the dir is COPY'd into the image).
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const migrationsPath = path.join(__dirname, 'migrations');
     DB_DEBUG('Using migrations path:', migrationsPath);
     await drizzleMigrate(db, {
       migrationsFolder: migrationsPath,

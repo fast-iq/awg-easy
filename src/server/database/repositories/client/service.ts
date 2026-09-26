@@ -168,7 +168,7 @@ export class ClientService {
     return this.#statements.findById.execute({ id });
   }
 
-  async create({ name, expiresAt }: ClientCreateType) {
+  async create({ name, expiresAt, userId }: ClientCreateType & { userId: ID }) {
     const privateKey = await wg.generatePrivateKey();
     const publicKey = await wg.getPublicKey(privateKey);
     const preSharedKey = await wg.generatePreSharedKey();
@@ -204,8 +204,7 @@ export class ClientService {
         .insert(client)
         .values({
           name,
-          // TODO: properly assign user id
-          userId: 1,
+          userId,
           interfaceId: 'wg0',
           expiresAt,
           privateKey,
@@ -263,14 +262,15 @@ export class ClientService {
     preSharedKey,
     privateKey,
     publicKey,
-  }: ClientCreateFromExistingType) {
+    userId = 1,
+  }: ClientCreateFromExistingType & { userId?: ID }) {
     const clientConfig = await Database.userConfigs.get();
 
     return this.#db
       .insert(client)
       .values({
         name,
-        userId: 1,
+        userId,
         interfaceId: 'wg0',
         privateKey,
         publicKey,

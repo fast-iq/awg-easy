@@ -142,7 +142,11 @@ export function validateZod<T>(
           })
           .join('; ');
       }
-      throw new Error(message);
+      const err = new Error(message);
+      if (error instanceof Error) {
+        err.cause = error;
+      }
+      throw err;
     }
   };
 }

@@ -18,12 +18,12 @@
 >
 > Инструкция по правильной установке модуля на Ubuntu 24.x и выше: [amneziawg-linux-kernel-module for Ubuntu 24.x](docs/content/guides/ubuntu24ru.md)
 
-[![Build & Publish latest Image](https://github.com/evoll/awg-easy/actions/workflows/deploy.yml/badge.svg?branch=production)](https://github.com/evoll/awg-easy/actions/workflows/deploy.yml)
-[![Lint](https://github.com/evoll/awg-easy/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/evoll/awg-easy/actions/workflows/lint.yml)
-[![GitHub Stars](https://img.shields.io/github/stars/evoll/awg-easy)](https://github.com/evoll/awg-easy/stargazers)
-[![License](https://img.shields.io/github/license/evoll/awg-easy)](LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/evoll/awg-easy)](https://github.com/evoll/awg-easy/releases/latest)
-[![Image Pulls](https://img.shields.io/badge/image_pulls-12M+-blue)](https://github.com/evoll/awg-easy/pkgs/container/awg-easy)
+[![Build & Publish latest Image](https://github.com/fast-iq/awg-easy/actions/workflows/deploy.yml/badge.svg?branch=production)](https://github.com/fast-iq/awg-easy/actions/workflows/deploy.yml)
+[![Lint](https://github.com/fast-iq/awg-easy/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/fast-iq/awg-easy/actions/workflows/lint.yml)
+[![GitHub Stars](https://img.shields.io/github/stars/fast-iq/awg-easy)](https://github.com/fast-iq/awg-easy/stargazers)
+[![License](https://img.shields.io/github/license/fast-iq/awg-easy)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/fast-iq/awg-easy)](https://github.com/fast-iq/awg-easy/releases/latest)
+[![Image Pulls](https://img.shields.io/badge/image_pulls-12M+-blue)](https://github.com/fast-iq/awg-easy/pkgs/container/awg-easy)
 
 You have found the easiest way to install & manage AmneziaWG on any Linux host!
 
@@ -58,23 +58,23 @@ This project is a fork of [wg-easy](https://github.com/wg-easy/wg-easy)
 - 2FA support
 
 > [!NOTE]
-> To better manage documentation for this project, it has its own site here: [https://evoll.github.io/awg-easy/latest](https://evoll.github.io/awg-easy/latest)
+> To better manage documentation for this project, it has its own site here: [https://fast-iq.github.io/awg-easy/latest](https://fast-iq.github.io/awg-easy/latest)
 
-- [Getting Started](https://evoll.github.io/awg-easy/latest/getting-started/)
-- [Basic Installation](https://evoll.github.io/awg-easy/latest/examples/tutorials/basic-installation/)
-- [Caddy](https://evoll.github.io/awg-easy/latest/examples/tutorials/caddy/)
-- [Traefik](https://evoll.github.io/awg-easy/latest/examples/tutorials/traefik/)
-- [Podman](https://evoll.github.io/awg-easy/latest/examples/tutorials/podman-nft/)
-- [AdGuard Home](https://evoll.github.io/awg-easy/latest/examples/tutorials/adguard/)
+- [Getting Started](https://fast-iq.github.io/awg-easy/latest/getting-started/)
+- [Basic Installation](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/basic-installation/)
+- [Caddy](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/caddy/)
+- [Traefik](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/traefik/)
+- [Podman](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/podman-nft/)
+- [AdGuard Home](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/adguard/)
 
 > [!NOTE]
-> If you want to migrate from the old version to the new version, you can find the migration guide here: [Migration Guide](https://evoll.github.io/awg-easy/latest/advanced/migrate/)
+> If you want to migrate from the old version to the new version, you can find the migration guide here: [Migration Guide](https://fast-iq.github.io/awg-easy/latest/advanced/migrate/)
 
 ## Installation
 
 This is a quick start guide to get you up and running with AmneziaWG Easy.
 
-For a more detailed installation guide, please refer to the [Getting Started](https://evoll.github.io/awg-easy/latest/getting-started/) page.
+For a more detailed installation guide, please refer to the [Getting Started](https://fast-iq.github.io/awg-easy/latest/getting-started/) page.
 
 ### 1. Install Docker
 
@@ -91,11 +91,11 @@ And log in again.
 
 The easiest way to run AmneziaWG Easy is with Docker Compose.
 
-Just follow [these steps](https://evoll.github.io/awg-easy/latest/examples/tutorials/basic-installation/) in the detailed documentation.
+Just follow [these steps](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/basic-installation/) in the detailed documentation.
 
-You can also install AmneziaWG Easy with the [docker run command](https://evoll.github.io/awg-easy/latest/examples/tutorials/docker-run/) or via [podman](https://evoll.github.io/awg-easy/latest/examples/tutorials/podman-nft/).
+You can also install AmneziaWG Easy with the [docker run command](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/docker-run/) or via [podman](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/podman-nft/).
 
-Now [setup a reverse proxy](https://evoll.github.io/awg-easy/latest/examples/tutorials/basic-installation/#setup-reverse-proxy) to be able to access the Web UI securely from the internet. This step is optional, just make sure to follow the guide [here](https://evoll.github.io/awg-easy/latest/examples/tutorials/reverse-proxyless/) if you decide not to do it.
+Now [setup a reverse proxy](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/basic-installation/#setup-reverse-proxy) to be able to access the Web UI securely from the internet. This step is optional, just make sure to follow the guide [here](https://fast-iq.github.io/awg-easy/latest/examples/tutorials/reverse-proxyless/) if you decide not to do it.
 
 ## Donate
 

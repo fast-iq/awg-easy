@@ -56,7 +56,7 @@ sudo docker compose up -d
 ```shell
 sudo docker stop awg-easy
 sudo docker rm awg-easy
-sudo docker pull ghcr.io/evoll/awg-easy
+sudo docker pull ghcr.io/fast-iq/awg-easy
 ```
 
 And then run the `docker run -d \ ...` command from [Docker Run][docker-run] again.

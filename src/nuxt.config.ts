@@ -36,7 +36,7 @@ export default defineNuxtConfig({
       strictMessage: false,
       escapeHtml: false,
     },
-    // https://evoll.github.io/awg-easy/latest/contributing/translation/
+    // https://fast-iq.github.io/awg-easy/latest/contributing/translation/
     locales: [
       {
         // same as i18n.config.ts

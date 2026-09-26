@@ -109,7 +109,7 @@ dpkg -s
 ### 5. Развернуть Амнезию на сервере в Docker:
 
 sudo mkdir -p /etc/docker/containers/awg-easy
-sudo curl -o /etc/docker/containers/awg-easy/docker-compose.yml https://raw.githubusercontent.com/evoll/awg-easy/main/docker-compose.yml
+sudo curl -o /etc/docker/containers/awg-easy/docker-compose.yml https://raw.githubusercontent.com/fast-iq/awg-easy/main/docker-compose.yml
 
 cd /etc/docker/containers/awg-easy
 sudo docker compose up -d
@@ -121,4 +121,4 @@ cd /etc/docker/containers/awg-easy
 sudo docker compose pull
 sudo docker compose up -d
 
-Настройки можно посмотреть тут: https://evoll.github.io/awg-easy/latest/examples/tutorials/basic-installation/
+Настройки можно посмотреть тут: https://fast-iq.github.io/awg-easy/latest/examples/tutorials/basic-installation/

@@ -31,7 +31,7 @@ Please keep in mind that open source software is built by people like you, who s
 
 Don't have time to contribute? No worries, here are some other ways to show your support for awg-easy:
 
-- star the [project](https://github.com/evoll/awg-easy)
+- star the [project](https://github.com/fast-iq/awg-easy)
 - tweet your support for awg-easy
 
 

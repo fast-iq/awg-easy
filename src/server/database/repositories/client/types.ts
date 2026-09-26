@@ -52,8 +52,11 @@ export const ClientCreateSchema = z.object({
 
 export type ClientCreateType = z.infer<typeof ClientCreateSchema>;
 
+const sort = z.enum(['asc', 'desc']).optional();
+
 export const ClientQuerySchema = z.object({
   filter: filter,
+  sort,
 });
 
 export type ClientQueryType = z.infer<typeof ClientQuerySchema>;

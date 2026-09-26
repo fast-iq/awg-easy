@@ -37,3 +37,11 @@ export function isValidPasswordHash(hash: string): boolean {
     return false;
   }
 }
+
+/**
+ * A pre-computed argon2id hash of a random string. Used to perform a dummy
+ * verification when the user doesn't exist, so timing doesn't leak whether
+ * a username is valid (see getCurrentUser in utils/session.ts).
+ */
+export const DUMMY_ARGON2_HASH =
+  '$argon2id$v=19$m=65536,t=3,p=4$ZmFrZWhhc2hzYWx0MTIzNDU2Nzg$8fBpQ7yKJ1vXhWqLmNcRtYsUdGkHjAeOwPzVbCxMnEi';

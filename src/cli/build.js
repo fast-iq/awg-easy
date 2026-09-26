@@ -9,17 +9,16 @@ esbuild.build({
   outfile: fileURLToPath(new URL('../.output/server/cli.mjs', import.meta.url)),
   platform: 'node',
   format: 'esm',
-  plugins: [
-    {
-      name: 'make-all-packages-external',
-      setup(build) {
-        let filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
-        build.onResolve({ filter }, (args) => ({
-          path: args.path,
-          external: true,
-        }));
-      },
-    },
+  external: [
+    'drizzle-orm/libsql',
+    '@libsql/client',
+    'citty',
+    'debug',
+    'consola',
+    'ip-bigint',
+    'cidr-tools',
+    'is-cidr',
+    'is-ip',
   ],
   logLevel: 'info',
 });

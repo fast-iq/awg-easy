@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3';
+import { DUMMY_ARGON2_HASH } from './password';
 import type { UserType } from '#db/repositories/user/types';
 
 export type WGSession = Partial<{
@@ -12,8 +13,10 @@ export async function useWGSession(event: H3Event, rememberMe = false) {
   return useSession<WGSession>(event, {
     password: sessionConfig.sessionPassword,
     name,
-    // TODO: add session expiration
-    // maxAge: undefined
+    // Sessions always expire after sessionTimeout (admin-configurable).
+    // "Remember me" extends the *cookie* lifetime so the browser keeps
+    // sending it; the session itself still expires on the server side.
+    maxAge: sessionConfig.sessionTimeout,
     cookie: {
       maxAge: rememberMe ? sessionConfig.sessionTimeout : undefined,
       secure: !WG_ENV.INSECURE,
@@ -26,6 +29,7 @@ export async function getWGSession(event: H3Event) {
   return getSession<WGSession>(event, {
     password: sessionConfig.sessionPassword,
     name,
+    maxAge: sessionConfig.sessionTimeout,
     cookie: {
       secure: !WG_ENV.INSECURE,
     },
@@ -70,27 +74,19 @@ export async function getCurrentUser(event: H3Event) {
       });
     }
 
-    // TODO: timing can be used to enumerate usernames
-
     const foundUser = await Database.users.getByUsername(username);
 
-    if (!foundUser) {
+    // Always run an argon2 verification (even for unknown users) so the
+    // response time doesn't reveal whether a username exists.
+    const hashToVerify = foundUser?.password ?? DUMMY_ARGON2_HASH;
+    const passwordValid = await isPasswordValid(password, hashToVerify);
+
+    if (!foundUser || !passwordValid) {
       throw createError({
         statusCode: 401,
         statusMessage: 'Session failed',
       });
     }
-
-    const userHashPassword = foundUser.password;
-    const passwordValid = await isPasswordValid(password, userHashPassword);
-
-    if (!passwordValid) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: 'Session failed',
-      });
-    }
-    user = foundUser;
   } else {
     throw createError({
       statusCode: 401,

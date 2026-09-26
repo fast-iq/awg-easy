@@ -16,7 +16,7 @@ docker compose exec -it awg-easy cli
 ```shell
 docker run --rm -it \
     -v ~/.awg-easy:/etc/wireguard \
-    ghcr.io/evoll/awg-easy:15 \
+    ghcr.io/fast-iq/awg-easy:15 \
     cli
 ```
 

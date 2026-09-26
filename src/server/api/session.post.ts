@@ -1,6 +1,19 @@
 import { UserLoginSchema } from '#db/repositories/user/types';
 
+// Brute-force protection: max 5 login attempts per IP per 15 minutes.
+const LOGIN_RATE_LIMIT = { limit: 5, windowMs: 15 * 60 * 1000 };
+
 export default defineEventHandler(async (event) => {
+  const ip = getRequestIP(event, { xForwardedFor: true }) ?? 'unknown';
+  const rl = rateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+  if (rl.limited) {
+    event.node.res.setHeader('Retry-After', rl.retryAfterSec);
+    throw createError({
+      statusCode: 429,
+      statusMessage: `Too many login attempts. Try again in ${rl.retryAfterSec}s`,
+    });
+  }
+
   const { username, password, remember, totpCode } = await readValidatedBody(
     event,
     validateZod(UserLoginSchema, event)

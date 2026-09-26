@@ -26,7 +26,7 @@ Follow the Docs here: <https://docs.docker.com/engine/install/> and install Dock
 2. Download docker compose file
 
     ```shell
-    sudo curl -o /etc/docker/containers/awg-easy/docker-compose.yml https://raw.githubusercontent.com/evoll/awg-easy/main/docker-compose.yml
+    sudo curl -o /etc/docker/containers/awg-easy/docker-compose.yml https://raw.githubusercontent.com/fast-iq/awg-easy/main/docker-compose.yml
     ```
 
 3. Start `awg-easy`
