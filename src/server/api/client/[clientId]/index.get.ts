@@ -10,7 +10,6 @@ export default definePermissionEventHandler(
     );
 
     const result = await Database.clients.get(clientId);
-    checkPermissions(result);
 
     if (!result) {
       throw createError({
@@ -18,6 +17,8 @@ export default definePermissionEventHandler(
         statusMessage: 'Client not found',
       });
     }
+
+    checkPermissions(result);
 
     // data can be undefined if the client is disabled
     const data = await WireGuard.dumpByPublicKey(result.publicKey);

@@ -5,6 +5,42 @@ import type { InterfaceType } from '#db/repositories/interface/types';
 
 const WG_DEBUG = debug('WireGuard');
 
+type DumpEntry = Awaited<ReturnType<typeof wg.dump>>[number];
+
+type ClientWithDump = {
+  publicKey: string;
+  latestHandshakeAt: Date | null;
+  endpoint: string | null;
+  transferRx: number | null;
+  transferTx: number | null;
+};
+
+/**
+ * Merge `wg show dump` data into client objects.
+ * Uses a Map by publicKey to keep this O(clients + dump) instead of O(n^2).
+ */
+function applyDumpToClients(
+  clients: ClientWithDump[],
+  dump: DumpEntry[]
+) {
+  const byPublicKey = new Map<string, ClientWithDump>();
+  for (const client of clients) {
+    byPublicKey.set(client.publicKey, client);
+  }
+
+  for (const entry of dump) {
+    const client = byPublicKey.get(entry.publicKey);
+    if (!client) {
+      continue;
+    }
+
+    client.latestHandshakeAt = entry.latestHandshakeAt;
+    client.endpoint = entry.endpoint;
+    client.transferRx = entry.transferRx;
+    client.transferTx = entry.transferTx;
+  }
+}
+
 class WireGuard {
   /**
    * Save and sync config
@@ -81,19 +117,7 @@ class WireGuard {
 
     // Loop WireGuard status
     const dump = await wg.dump(wgInterface.name);
-    dump.forEach(
-      ({ publicKey, latestHandshakeAt, endpoint, transferRx, transferTx }) => {
-        const client = clients.find((client) => client.publicKey === publicKey);
-        if (!client) {
-          return;
-        }
-
-        client.latestHandshakeAt = latestHandshakeAt;
-        client.endpoint = endpoint;
-        client.transferRx = transferRx;
-        client.transferTx = transferTx;
-      }
-    );
+    applyDumpToClients(clients, dump);
 
     return clients;
   }
@@ -129,19 +153,7 @@ class WireGuard {
 
     // Loop WireGuard status
     const dump = await wg.dump(wgInterface.name);
-    dump.forEach(
-      ({ publicKey, latestHandshakeAt, endpoint, transferRx, transferTx }) => {
-        const client = clients.find((client) => client.publicKey === publicKey);
-        if (!client) {
-          return;
-        }
-
-        client.latestHandshakeAt = latestHandshakeAt;
-        client.endpoint = endpoint;
-        client.transferRx = transferRx;
-        client.transferTx = transferTx;
-      }
-    );
+    applyDumpToClients(clients, dump);
 
     return clients;
   }

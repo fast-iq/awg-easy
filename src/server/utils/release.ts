@@ -1,3 +1,5 @@
+import { valid } from 'semver';
+
 type GithubRelease = {
   tag_name: string;
   body: string;
@@ -6,22 +8,32 @@ type GithubRelease = {
 async function fetchLatestRelease() {
   try {
     const response = await $fetch<GithubRelease>(
-      'https://api.github.com/repos/evoll/awg-easy/releases/latest',
+      'https://api.github.com/repos/fast-iq/awg-easy/releases/latest',
       { method: 'get', timeout: 5000 }
     );
     if (!response) {
       throw new Error('Empty Response');
     }
+
+    const tag = response.tag_name;
+    // GitHub tags may or may not include the `v` prefix and are not
+    // guaranteed to be valid semver. Strip the prefix for comparison.
+    const version = tag.replace(/^v/, '');
+
+    if (!valid(version)) {
+      throw new Error(`Tag is not a valid semver: ${tag}`);
+    }
+
     const changelog = response.body.split('\r\n\r\n')[0] ?? '';
     return {
-      version: response.tag_name,
+      version,
       changelog,
     };
   } catch (e) {
     SERVER_DEBUG('Failed to fetch latest releases: ', e);
     throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch latest release',
+      statusCode: 503,
+      statusMessage: 'Release information unavailable',
     });
   }
 }

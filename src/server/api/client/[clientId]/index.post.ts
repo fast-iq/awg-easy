@@ -18,6 +18,14 @@ export default definePermissionEventHandler(
     );
 
     const client = await Database.clients.get(clientId);
+
+    if (!client) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Client not found',
+      });
+    }
+
     checkPermissions(client);
 
     await Database.clients.update(clientId, data);

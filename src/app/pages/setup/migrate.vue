@@ -31,7 +31,6 @@ function onChangeFile(evt: Event) {
 
   if (file) {
     backupFile.value = file;
-    console.log('selected file', backupFile.value);
   }
 }
 

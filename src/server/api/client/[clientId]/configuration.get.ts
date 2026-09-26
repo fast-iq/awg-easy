@@ -9,7 +9,6 @@ export default definePermissionEventHandler(
       validateZod(ClientGetSchema, event)
     );
     const client = await Database.clients.get(clientId);
-    checkPermissions(client);
 
     if (!client) {
       throw createError({
@@ -17,6 +16,8 @@ export default definePermissionEventHandler(
         statusMessage: 'Client not found',
       });
     }
+
+    checkPermissions(client);
 
     const config = await WireGuard.getClientConfiguration({ clientId });
 

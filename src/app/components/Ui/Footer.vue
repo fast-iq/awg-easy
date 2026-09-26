@@ -4,7 +4,7 @@
       <a
         class="hover:underline"
         target="_blank"
-        href="https://github.com/evoll/awg-easy"
+        href="https://github.com/fast-iq/awg-easy"
         >AmneziaWG Easy</a
       >
       ({{ globalStore.information?.currentRelease }}) © 2021-2025 by
@@ -24,7 +24,7 @@
       ·
       <a
         class="hover:underline"
-        href="https://github.com/evoll/awg-easy#donate"
+        href="https://github.com/fast-iq/awg-easy#donate"
         target="_blank"
         >{{ $t('layout.donate') }}</a
       >

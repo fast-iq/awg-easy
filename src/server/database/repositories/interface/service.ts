@@ -78,9 +78,6 @@ export class InterfaceService {
       const clients = await tx.query.client.findMany().execute();
 
       for (const client of clients) {
-        // TODO: optimize
-        const clients = await tx.query.client.findMany().execute();
-
         // only calculate ip if cidr has changed
 
         let nextIpv4 = client.ipv4Address;

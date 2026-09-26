@@ -1,5 +1,5 @@
+import { randomBytes } from 'node:crypto';
 import { eq, sql } from 'drizzle-orm';
-import CRC32 from 'crc-32';
 import { oneTimeLink } from './schema';
 import type { DBType } from '#db/sqlite';
 
@@ -46,8 +46,8 @@ export class OneTimeLinkService {
   }
 
   generate(id: ID) {
-    const key = `${id}-${Math.floor(Math.random() * 1000)}`;
-    const oneTimeLink = Math.abs(CRC32.str(key)).toString(16);
+    // Cryptographically secure token (128 bits of entropy).
+    const oneTimeLink = randomBytes(16).toString('hex');
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
     return this.#statements.create.execute({ id, oneTimeLink, expiresAt });
