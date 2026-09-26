@@ -89,6 +89,12 @@
     - Осталось: `linux/amd64` + `linux/arm64` (Raspberry Pi 4/5 и новее).
     - Если понадобится armv7 — только node:22-alpine или компиляция Node из исходников.
 
+### 2026-09-26: фикс "Merge & Deploy" (Codeberg login падает без секретов)
+
+15. **`docker/login-action@v3` для codeberg.org** ронял `Error: Username and password required` в job `docker-merge` — секреты `CODEBERG_USER`/`CODEBERG_PASS` не заданы в форке (были в evoll/awg-easy).
+    - `deploy-edge.yml`, `deploy.yml` — добавлен `continue-on-error: true` на шаг "Login to Codeberg" + закомментирован `codeberg.org/fast-iq/awg-easy` в `images` metadata-action (как уже было в `deploy-development.yml`).
+    - Если понадобится пуш на Codeberg — задать секреты в Settings → Secrets и раскомментировать.
+
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
 **Безопасность:**
