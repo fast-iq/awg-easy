@@ -45,76 +45,6 @@ export default defineNuxtConfig({
         language: 'en-US',
         name: 'English',
       },
-      {
-        code: 'de',
-        language: 'de-DE',
-        name: 'Deutsch',
-      },
-      {
-        code: 'es',
-        language: 'es-ES',
-        name: 'Español',
-      },
-      {
-        code: 'it',
-        language: 'it-IT',
-        name: 'Italiano',
-      },
-      {
-        code: 'fr',
-        language: 'fr-FR',
-        name: 'Français',
-      },
-      {
-        code: 'ko',
-        language: 'ko-KR',
-        name: '한국어',
-      },
-      {
-        code: 'ru',
-        language: 'ru-RU',
-        name: 'Русский',
-      },
-      {
-        code: 'uk',
-        language: 'uk-UA',
-        name: 'Українська',
-      },
-      {
-        code: 'zh-CN',
-        language: 'zh-CN',
-        name: '简体中文',
-      },
-      {
-        code: 'zh-HK',
-        language: 'zh-HK',
-        name: '繁體中文（香港）',
-      },
-      {
-        code: 'pl',
-        language: 'pl-PL',
-        name: 'Polski',
-      },
-      {
-        code: 'pt-BR',
-        language: 'pt-BR',
-        name: 'Português (Brasil)',
-      },
-      {
-        code: 'tr',
-        language: 'tr-TR',
-        name: 'Türkçe',
-      },
-      {
-        code: 'bn',
-        language: 'bn-BD',
-        name: 'বাংলা',
-      },
-      {
-        code: 'id',
-        language: 'id-ID',
-        name: 'Bahasa Indonesia',
-      },
     ],
     defaultLocale: 'en',
     vueI18n: './i18n.config.ts',
@@ -124,9 +54,6 @@ export default defineNuxtConfig({
       fallbackLocale: 'en',
       // Disable redirect to prevent locale switching during SSR
       redirectOn: 'root',
-    },
-    bundle: {
-      optimizeTranslationDirective: false,
     },
   },
   nitro: {

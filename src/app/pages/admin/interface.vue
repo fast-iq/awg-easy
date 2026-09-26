@@ -255,7 +255,6 @@ const _restartInterface = useSubmit(
 );
 
 async function restartInterface() {
-  // call without passing undefined
-  await _restartInterface();
+  await _restartInterface(undefined);
 }
 </script>

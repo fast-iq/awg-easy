@@ -114,7 +114,7 @@ async function generateRandomAwgParams(db: DBServiceType) {
     DB_DEBUG('Generating random AmneziaWG obfuscation parameters...');
     const awgParams = generateAwgObfuscationParams();
     DB_DEBUG('Generated AWG params:', awgParams);
-    await db.interfaces.update(awgParams);
+    await db.interfaces.updateAwgParams(awgParams);
   } else {
     DB_DEBUG('AWG params already customized, skipping generation');
   }

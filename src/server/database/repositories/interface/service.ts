@@ -4,6 +4,7 @@ import { wgInterface } from './schema';
 import type { InterfaceCidrUpdateType, InterfaceUpdateType } from './types';
 import { client as clientSchema } from '#db/schema';
 import type { DBType } from '#db/sqlite';
+import type { AwgObfuscationParams } from '#utils/awg-params';
 
 function createPreparedStatement(db: DBType) {
   return {
@@ -49,6 +50,15 @@ export class InterfaceService {
   }
 
   update(data: InterfaceUpdateType) {
+    return this.#db
+      .update(wgInterface)
+      .set(data)
+      .where(eq(wgInterface.name, 'wg0'))
+      .execute();
+  }
+
+  // Only the AWG obfuscation params (partial of InterfaceUpdateType)
+  updateAwgParams(data: AwgObfuscationParams) {
     return this.#db
       .update(wgInterface)
       .set(data)

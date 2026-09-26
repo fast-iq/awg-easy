@@ -1,41 +1,16 @@
-import type {
-  NitroFetchRequest,
-  NitroFetchOptions,
-  TypedInternalResponse,
-  ExtractedRouteMethod,
-} from 'nitropack/types';
 import { FetchError } from 'ofetch';
 
-type RevertFn<
-  R extends NitroFetchRequest,
-  T = unknown,
-  O extends NitroFetchOptions<R> = NitroFetchOptions<R>,
-> = (
-  _success: boolean,
-  _data?:
-    | TypedInternalResponse<
-        R,
-        T,
-        NitroFetchOptions<R> extends O ? 'get' : ExtractedRouteMethod<R, O>
-      >
-    | undefined
-) => Promise<void>;
-
-type SubmitOpts<
-  R extends NitroFetchRequest,
-  T = unknown,
-  O extends NitroFetchOptions<R> = NitroFetchOptions<R>,
-> = {
-  revert: RevertFn<R, T, O>;
+type SubmitOpts = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  revert: (success: boolean, data?: any) => Promise<void>;
   successMsg?: string;
   noSuccessToast?: boolean;
 };
 
-export function useSubmit<
-  R extends NitroFetchRequest,
-  O extends NitroFetchOptions<R> & { body?: never },
-  T = unknown,
->(url: R, options: O, opts: SubmitOpts<R, T, O>) {
+// The old nitropack typed-route generics caused TS2321 "Excessive stack depth"
+// on every call site. Use plain types instead — runtime behavior is unchanged.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSubmit(url: any, options: any, opts: SubmitOpts) {
   const toast = useToast();
 
   return async (data: unknown) => {
@@ -52,8 +27,7 @@ export function useSubmit<
         });
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await opts.revert(true, res as any);
+      await opts.revert(true, res);
     } catch (e) {
       if (e instanceof FetchError) {
         toast.showToast({
