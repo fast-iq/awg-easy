@@ -6,15 +6,15 @@
  */
 
 export interface AwgObfuscationParams {
-  jc: number;   // Junk packet count
+  jc: number; // Junk packet count
   jmin: number; // Junk packet minimum size
   jmax: number; // Junk packet maximum size
-  s1: number;   // Init header junk size
-  s2: number;   // Response header junk size
-  h1: number;   // Init magic header
-  h2: number;   // Response magic header
-  h3: number;   // Cookie magic header
-  h4: number;   // Transport magic header
+  s1: number; // Init header junk size
+  s2: number; // Response header junk size
+  h1: number; // Init magic header
+  h2: number; // Response magic header
+  h3: number; // Cookie magic header
+  h4: number; // Transport magic header
 }
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -28,14 +28,13 @@ const MESSAGE_TRANSPORT_SIZE = 32;
 // Amnezia documentation constraints (assuming MTU = 1280)
 const MTU = 1280;
 const S1_MAX_MTU = MTU - MESSAGE_INITIATION_SIZE; // 1132
-const S2_MAX_MTU = MTU - MESSAGE_RESPONSE_SIZE;   // 1188
-/* eslint-disable @typescript-eslint/no-unused-vars */
+const S2_MAX_MTU = MTU - MESSAGE_RESPONSE_SIZE; // 1188
 
 // Recommended ranges from Amnezia documentation for random generation
 const JC_MIN = 4;
 const JC_MAX = 12;
 const JMIN_MIN = 8;
-const JMIN_MAX = 80;  // Random between recommended 8 and upper bounds
+const JMIN_MAX = 80; // Random between recommended 8 and upper bounds
 const JMAX_MIN = 80;
 const JMAX_MAX = 1280;
 const S_MIN = 15;
@@ -44,8 +43,7 @@ const S_MAX = 150;
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Magic header ranges (must be > 4 and non-overlapping)
 const MAGIC_HEADER_MIN = 5;
-const MAGIC_HEADER_MAX = 0xFFFFFFFF; // uint32 max
-/* eslint-disable @typescript-eslint/no-unused-vars */
+const MAGIC_HEADER_MAX = 0xffffffff; // uint32 max
 
 /**
  * Generate a random integer between min and max (inclusive)

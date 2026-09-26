@@ -4,7 +4,6 @@
  */
 import { connect, type DBServiceType } from '#db/sqlite';
 
-// eslint-disable-next-line import/no-mutable-exports
 let provider = null as never as DBServiceType;
 
 const startupPromise: Promise<void> = (async () => {

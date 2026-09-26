@@ -19,10 +19,7 @@ type ClientWithDump = {
  * Merge `wg show dump` data into client objects.
  * Uses a Map by publicKey to keep this O(clients + dump) instead of O(n^2).
  */
-function applyDumpToClients(
-  clients: ClientWithDump[],
-  dump: DumpEntry[]
-) {
+function applyDumpToClients(clients: ClientWithDump[], dump: DumpEntry[]) {
   const byPublicKey = new Map<string, ClientWithDump>();
   for (const client of clients) {
     byPublicKey.set(client.publicKey, client);
