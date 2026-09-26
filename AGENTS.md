@@ -109,6 +109,12 @@
 25. **i18n проверено**: в бандл попадает только `en.json` (импорт в `i18n.config.ts`), остальные 14 локалей (~130 КБ) не грузятся — ок.
 26. **Dockerfile libsql через npm** — оставлено как есть: работает, native-бинарники libsql ставятся отдельно от pnpm осознанно (избегание pnpm dedupe для native). Не чинить без реальной проблемы.
 
+### 2026-09-26: фикс Check Docs (CI падал на prettier --check docs)
+
+27. **`docs/content/getting-started.md`** — после замены ссылок evoll → fast-iq (пункт 22) ячейки markdown-таблицы стали длиннее print width prettier → `prettier --check docs` в CI падал на 34 файлах. Исправлено `prettier --write docs`: реальный diff только в getting-started.md (выравнивание таблицы), остальные 33 файла — pre-existing drift, который prettier тоже привёл к стилю (commit `b38e1e9`).
+    - **Правило**: после массовых замен текста через скрипт/PowerShell всегда прогонять `format:check:docs` локально перед пушем.
+    - **Замечено, не тронуто**: `docs/content/advanced/config/amneziawg-kernel-module.md` содержит UTF-8 BOM (добавлен в `772813b "Docs fix"`). Prettier 3.x BOM не роняет — check проходит. Если когда-нибудь CI упадёт на этом файле — убрать BOM: `[System.IO.File]::WriteAllBytes($f, $bytes[3..])`.
+
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
 **Безопасность:**
