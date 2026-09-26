@@ -58,6 +58,7 @@
     - `Dockerfile.dev` — `node:jod-alpine` → `node:24-alpine`.
     - `src/nuxt.config.ts` — esbuild target `node20` → `node24`.
     - **Action-версии НЕ поднимать без необходимости**: `pnpm/action-setup@v4` → `@v4.4.0` (внутри Node 24, warn ушёл). Остальные actions (checkout v6, setup-node v6 и т.д.) работают на Node 24 — не трогать.
+    - **arm/v7 убран из CI** (см. пункт 14) — `node:24-alpine` не собирается под 32-битный ARM.
 
 ### 2026-09-26: фикс format:check (CI падал на 9 файлах)
 
@@ -80,6 +81,13 @@
     - `nuxt.config.ts` — удалены 13 локалей (de/es/it/fr/ko/ru/uk/zh-CN/zh-HK/pl/pt-BR/tr/bn/id) без JSON-файлов → фикс TS2740 в `i18n.config.ts`; удалён неизвестный `bundle.optimizeTranslationDirective` (TS2353, опции нет в @nuxtjs/i18n 10.x).
     - `sqlite.ts:117` — добавлен метод `updateAwgParams(AwgObfuscationParams)` в `InterfaceService` (partial-обновление только AWG-полей), вместо `update(awgParams)` который ждал полный `InterfaceUpdateType` (TS2345).
     - **Проверено локально**: typecheck ✅ exit 0, lint ✅ 0 ошибок 0 warn, format:check ✅.
+
+### 2026-09-26: убран arm/v7 из CI (Node 24 не собирается под 32-битный ARM)
+
+14. **`linux/arm/v7` удалён из matrix в 4 workflow'ах**: `deploy.yml`, `deploy-development.yml`, `deploy-edge.yml`, `deploy-pr.yml`.
+    - **Причина**: официальный образ `node:24-alpine` содержит только amd64, arm64/v8, s390x (проверено по манифесту Docker Hub). Node 20/21/22 ещё имели arm/v6+arm/v7. Сборка под `linux/arm/v7` падала: `no match for platform in manifest`.
+    - Осталось: `linux/amd64` + `linux/arm64` (Raspberry Pi 4/5 и новее).
+    - Если понадобится armv7 — только node:22-alpine или компиляция Node из исходников.
 
 ### Найденные проблемы (НЕ исправлены, требуют решения)
 
