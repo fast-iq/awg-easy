@@ -9,6 +9,9 @@ on:
 # This workflow does not support fixing old versions
 # as this will break the latest and major tags
 
+permissions:
+  contents: read
+
 jobs:
   docker-build:
     name: Build Docker
@@ -17,6 +20,7 @@ jobs:
       github.repository_owner == 'fast-iq' &&
       startsWith(github.ref, 'refs/tags/v')
     permissions:
+      contents: read
       packages: write
     strategy:
       fail-fast: false
@@ -27,7 +31,7 @@ jobs:
           - platform: linux/arm64
             os: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Prepare
         run: |
@@ -54,11 +58,11 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.4.1
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           platforms: ${{ matrix.arch.platform }}
@@ -89,6 +93,7 @@ jobs:
       github.repository_owner == 'fast-iq' &&
       startsWith(github.ref, 'refs/tags/v')
     permissions:
+      contents: read
       packages: write
     needs: docker-build
     steps:
@@ -115,7 +120,7 @@ jobs:
           password: ${{ secrets.CODEBERG_PASS }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.4.1
 
       - name: Docker meta
         id: meta
@@ -149,9 +154,10 @@ jobs:
       startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
+      actions: read
     needs: docker-merge
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup Python
         uses: actions/setup-python@v6

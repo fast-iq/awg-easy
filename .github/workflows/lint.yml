@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   docs:
     name: Check Docs
@@ -92,5 +95,10 @@ jobs:
       - name: Audit dependencies (critical only)
         run: |
           cd src
+          pnpm install --no-frozen-lockfile
+          pnpm audit --audit-level=critical
+
+      - name: Audit root dependencies (critical only)
+        run: |
           pnpm install --no-frozen-lockfile
           pnpm audit --audit-level=critical

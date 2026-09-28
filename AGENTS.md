@@ -169,3 +169,14 @@
 ## Неудачные изменения / ошибки
 
 - 2026-09-26: «ошибка n18i после авторизации» — точного совпадения с этим текстом в коде нет. Наиболее вероятная причина — ранний 500 на `/api/session` или `/api/client` сразу после логина, когда БД/интерфейс ещё не готовы (Proxy в `Database.ts` бросал «Database not yet initialized»). Исправлено ожиданием `startupPromise` + try/catch вокруг `WireGuard.Startup()`. Проверить на проде после деплоя; если ошибка вернётся — смотреть точный текст в консоли браузера и логах контейнера.
+
+### 2026-09-28: CI/CD — стабильность + защита от уязвимостей (round 17)
+
+28. **Trivy severity gate** (`docker-image.yml`): `exit-code: "1"` + `severity: CRITICAL,HIGH` + `ignore-unfixed: true` — сборка падает на критических/высоких CVE в образе, unfixed не блокируют (alpine-пакеты обновляются с задержкой).
+29. **SBOM generation** (`docker-image.yml`, job `sbom`): `anchore/sbom-action@v0` → CycloneDX JSON артефакт (retention 30 дней). Полный манифест зависимостей образа для будущего CVE-триажа.
+30. **Dependency Review** (`.github/workflows/dependency-review.yml` — новый): `actions/dependency-review-action@v4`, `fail-on-severity: high` на PR. Блокирует merge если новая зависимость вносит known CVE или лицензионный конфликт.
+31. **Secret Scanning** (`.github/workflows/secret-scanning.yml` — новый): `gitleaks/gitleaks-action@v2` на push/PR к main. Поймёт случайно закоммиченные ключи до экспозиции.
+32. **Smoke test** (`deploy-pr.yml`): после сборки amd64-образа — `docker run` + curl `/api/information` (30 попыток × 2с). Ловит "собралось, но не стартует" до edge/prod.
+33. **Root pnpm audit** (`lint.yml`, job `security-audit`): добавлен второй шаг — аудит корневого `package.json` (prettier и dev-тулзы) на critical.
+34. **Permissions hardening** (все workflow'ы): workflow-level `permissions: contents: read`; job-level least-privilege (`packages: write` только в deploy, `security-events: write` в CodeQL, `contents: write` в docs/lockfile). Уменьшает blast radius если action скомпрометирован.
+35. **Action version bump** (deploy-*.yml): `actions/checkout@v5 → @v6`, `docker/setup-buildx-action@v3 → @v4.4.1`, `docker/build-push-action@v6 → @v7.4.0` — все Node 24 compatible, устраняет deprecation warnings.
