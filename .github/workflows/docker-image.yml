@@ -83,7 +83,7 @@ jobs:
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.32.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: awg-easy:ci
           format: table
@@ -121,7 +121,7 @@ jobs:
           output: sbom.cdx.json
           format: cyclonedx
       - name: Upload SBOM
-        uses: actions/upload-artifact@v6.1.0
+        uses: actions/upload-artifact@v4
         with:
           name: sbom
           path: sbom.cdx.json
