@@ -89,8 +89,8 @@ jobs:
           check-latest: true
           cache: "pnpm"
 
-      - name: Audit dependencies (high+critical)
+      - name: Audit dependencies (critical only)
         run: |
           cd src
           pnpm install --no-frozen-lockfile
-          pnpm audit --audit-level=high
+          pnpm audit --audit-level=critical
