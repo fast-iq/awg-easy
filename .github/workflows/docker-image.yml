@@ -19,7 +19,11 @@ jobs:
           # DL3025 is a false positive in the action's hadolint v2.12.0 image:
           # it cannot parse "HEALTHCHECK --interval=... CMD /bin/sh -c ..." and
           # flags the JSON-looking CMD. Fixed upstream (v2.15.0, commit 6e37923).
-          ignore: DL3025
+          # DL3003/DL3016/DL3018/DL4006 are intentional: cd in RUN is clearer
+          # than extra WORKDIRs, libsql is installed unpinned on purpose
+          # (native binary, see Dockerfile comment), apk versions are tracked
+          # via the base image, pipefail is not needed for these pipes.
+          ignore: DL3025,DL3003,DL3016,DL3018,DL4006
 
   build:
     name: Build the Docker image
@@ -73,7 +77,7 @@ jobs:
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.32.0
+        uses: aquasecurity/trivy-action@v0.32.0
         with:
           image-ref: awg-easy:ci
           format: table
