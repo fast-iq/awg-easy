@@ -92,7 +92,7 @@ jobs:
           ignore-unfixed: true
           # CVEs in npm's internal node_modules (base image, not fixable via pnpm)
           # and drizzle-orm 0.44.7 (0.45 is potentially breaking, tracked separately)
-          trivyignores: CVE-2026-14257,CVE-2026-69152,CVE-2026-39356,CVE-2026-69192,CVE-2026-73566
+          trivyignores: .trivyignore
 
   sbom:
     name: Generate SBOM
