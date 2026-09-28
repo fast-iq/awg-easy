@@ -1,0 +1,6 @@
+# Trivy configuration — skip CVEs in npm's internal node_modules
+# These are shipped inside the node:24-alpine base image and cannot be
+# overridden via pnpm. They will be resolved when the base image updates.
+skipDirs:
+  - /usr/local/lib/node_modules/npm/node_modules
+  - /opt/yarn-v1.22.22
