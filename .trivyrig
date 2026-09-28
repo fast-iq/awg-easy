@@ -1,0 +1,12 @@
+# Trivy ignore file — CVEs that cannot be fixed without risky upgrades
+# Format: https://trivy.dev/latest/docs/references/scanner/vulnerability/ignore/
+
+# drizzle-orm 0.44.7 → SQL injection via improperly escaped identifiers (CVE-2026-39356)
+# Fixed in 0.45.2, but 0.x minor bump = potentially breaking changes.
+# Will upgrade after reviewing drizzle-orm 0.45 changelog + running drizzle-kit generate.
+DRIZZLE_ORM_CVE: CVE-2026-39356
+
+# ip-address 10.2.0 → SSRF via inconsistent IP parsing (CVE-2026-69192)
+# This is a transitive dependency of npm itself (usr/local/lib/node_modules/npm/).
+# Cannot be overridden — it ships inside the node:24-alpine base image.
+IP_ADDRESS_CVE: CVE-2026-69192
