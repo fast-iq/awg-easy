@@ -1,17 +1,41 @@
 version: 2
 updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      production:
+        applies-to: "version-update"
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/src"
+    schedule:
+      interval: "weekly"
+    groups:
+      production:
+        applies-to: "version-update"
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    rebase-strategy: "auto"
-  - package-ecosystem: "npm"
+    groups:
+      actions:
+        applies-to: "version-update"
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-    rebase-strategy: "auto"
-  - package-ecosystem: "npm"
-    directory: "/src/"
-    schedule:
-      interval: "weekly"
-    rebase-strategy: "auto"
+    groups:
+      docker:
+        applies-to: "version-update"
+        patterns:
+          - "*"

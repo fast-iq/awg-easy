@@ -72,7 +72,7 @@ COPY --from=build /app/server/database/migrations /app/server/database/migration
 RUN cd /app/server && \
 	rm -rf node_modules package-lock.json && \
     npm install --no-save --legacy-peer-deps libsql && \
-    npm cache clean --force
+    rm -rf ~/.npm
 # cli
 COPY --from=build /app/cli/cli.sh /usr/local/bin/cli
 RUN chmod +x /usr/local/bin/cli
