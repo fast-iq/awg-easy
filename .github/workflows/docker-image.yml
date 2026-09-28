@@ -26,7 +26,10 @@ jobs:
           # than extra WORKDIRs, libsql is installed unpinned on purpose
           # (native binary, see Dockerfile comment), apk versions are tracked
           # via the base image, pipefail is not needed for these pipes.
-          ignore: DL3025,DL3003,DL3016,DL3018,DL4006
+          # DL3059/DL3019: consecutive RUN and --no-cache suggestions — most
+          # already fixed in Dockerfile; remaining cases are intentional
+          # (separate cache layers for kernel module build steps).
+          ignore: DL3025,DL3003,DL3016,DL3018,DL4006,DL3059,DL3019
 
   build:
     name: Build the Docker image

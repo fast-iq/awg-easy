@@ -1,10 +1,8 @@
 FROM docker.io/library/node:24-alpine AS build
 WORKDIR /app
 
-# update corepack
-RUN npm install --global corepack@latest
-# Install pnpm
-RUN corepack enable pnpm
+# update corepack + enable pnpm
+RUN npm install --global corepack@latest && corepack enable pnpm
 
 # Copy Web UI
 COPY src/package.json src/pnpm-lock.yaml ./
@@ -15,10 +13,11 @@ COPY src ./
 RUN pnpm build
 
 # Build amneziawg-tools
-RUN apk add linux-headers build-base git && \
+RUN apk add --no-cache linux-headers build-base git && \
     git clone https://github.com/amnezia-vpn/amneziawg-tools.git && \
     cd amneziawg-tools/src && \
-    make
+    make && \
+    rm -rf /var/cache/apk/*
 
 # Build amneziawg kernel module for Alpine linux-lts kernel (6.12.50)
 FROM alpine:3.22 AS kernel_module_builder
@@ -96,12 +95,10 @@ RUN apk add --no-cache \
     iptables-legacy \
     wireguard-tools
 
-RUN mkdir -p /etc/amnezia
-RUN ln -s /etc/wireguard /etc/amnezia/amneziawg
-
-# Use iptables-legacy
-RUN update-alternatives --install /usr/sbin/iptables iptables /usr/sbin/iptables-legacy 10 --slave /usr/sbin/iptables-restore iptables-restore /usr/sbin/iptables-legacy-restore --slave /usr/sbin/iptables-save iptables-save /usr/sbin/iptables-legacy-save
-RUN update-alternatives --install /usr/sbin/ip6tables ip6tables /usr/sbin/ip6tables-legacy 10 --slave /usr/sbin/ip6tables-restore ip6tables-restore /usr/sbin/ip6tables-legacy-restore --slave /usr/sbin/ip6tables-save ip6tables-save /usr/sbin/ip6tables-legacy-save
+RUN mkdir -p /etc/amnezia && \
+    ln -s /etc/wireguard /etc/amnezia/amneziawg && \
+    update-alternatives --install /usr/sbin/iptables iptables /usr/sbin/iptables-legacy 10 --slave /usr/sbin/iptables-restore iptables-restore /usr/sbin/iptables-legacy-restore --slave /usr/sbin/iptables-save iptables-save /usr/sbin/iptables-legacy-save && \
+    update-alternatives --install /usr/sbin/ip6tables ip6tables /usr/sbin/ip6tables-legacy 10 --slave /usr/sbin/ip6tables-restore ip6tables-restore /usr/sbin/ip6tables-legacy-restore --slave /usr/sbin/ip6tables-save ip6tables-save /usr/sbin/ip6tables-legacy-save
 
 # Set Environment
 ENV DEBUG=Server,WireGuard,Database,CMD
