@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/libsql';
 import { migrate as drizzleMigrate } from 'drizzle-orm/libsql/migrator';
@@ -66,11 +67,19 @@ export type DBServiceType = DBService;
 async function migrate() {
   try {
     DB_DEBUG('Migrating database...');
-    // Resolve relative to this file so the path is stable regardless of
-    // process.cwd(). In the Docker image this resolves to
-    // /app/server/database/migrations (the dir is COPY'd into the image).
+    // The file location differs per runtime: source tree in dev, inside the
+    // nitro bundle (/app/server/chunks/nitro/nitro.mjs) in the Docker image.
+    // Probe known locations for meta/_journal.json instead of assuming one.
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const migrationsPath = path.join(__dirname, 'migrations');
+    const candidates = [
+      path.join(__dirname, 'migrations'),
+      path.join(__dirname, '../../../server/database/migrations'),
+      path.join(process.cwd(), 'server/database/migrations'),
+    ] as const;
+    const migrationsPath =
+      candidates.find((candidate) =>
+        existsSync(path.join(candidate, 'meta', '_journal.json'))
+      ) ?? candidates[0];
     DB_DEBUG('Using migrations path:', migrationsPath);
     await drizzleMigrate(db, {
       migrationsFolder: migrationsPath,
