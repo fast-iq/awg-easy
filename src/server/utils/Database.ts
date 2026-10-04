@@ -19,22 +19,27 @@ const startupPromise: Promise<void> = (async () => {
   }
 })();
 
-export default new Proxy(
-  {},
-  {
+const createNode = (path: PropertyKey[]): unknown =>
+  new Proxy(() => {}, {
     get(_target, prop) {
-      // Wait for the real provider instead of crashing with a raw error.
-      // This makes early requests (e.g. /api/session right after boot) fail
-      // with a clear 503 instead of an unhandled "Database not yet initialized".
-      return (...args: unknown[]) =>
-        startupPromise.then(() => {
-          const real = provider as unknown as Record<PropertyKey, unknown>;
-          const value = real[prop];
-          if (typeof value === 'function') {
-            return (value as (...a: unknown[]) => unknown).apply(real, args);
-          }
-          return value;
-        });
+      return createNode([...path, prop]);
     },
-  }
-) as DBServiceType;
+    apply(_target, _thisArg, args) {
+      return startupPromise.then(() => {
+        const real = provider as unknown as Record<PropertyKey, unknown>;
+        let scope: Record<PropertyKey, unknown> = real;
+        for (const key of path.slice(0, -1)) {
+          scope = scope[key] as Record<PropertyKey, unknown>;
+        }
+        const fn = scope[path[path.length - 1] as PropertyKey];
+        if (typeof fn !== 'function') {
+          throw new TypeError(
+            `Database.${path.map(String).join('.')} is not a function`
+          );
+        }
+        return (fn as (...a: unknown[]) => unknown).apply(scope, args);
+      });
+    },
+  });
+
+export default createNode([]) as unknown as DBServiceType;
