@@ -72,75 +72,96 @@ export function validateZod<T>(
     } catch (error) {
       let message = 'Unexpected Error';
       if (error instanceof z.ZodError) {
-        const t = await useTranslation(event);
+        try {
+          const t = await useTranslation(event);
 
-        message = error.issues
-          .map((v) => {
-            let m = v.message;
+          message = error.issues
+            .map((v) => {
+              let m = v.message;
 
-            if (t) {
-              let newMessage = null;
-              if (v.message.startsWith('zod.')) {
-                switch (v.code) {
-                  case 'too_small':
-                    switch (v.origin) {
-                      case 'string':
-                        newMessage = t('zod.generic.stringMin', [
-                          t(v.message),
-                          v.minimum,
-                        ]);
-                        break;
-                      case 'number':
-                        newMessage = t('zod.generic.numberMin', [
-                          t(v.message),
-                          v.minimum,
-                        ]);
-                        break;
-                    }
-                    break;
-                  case 'invalid_type': {
-                    if (v.input === null || v.input === undefined) {
-                      newMessage = t('zod.generic.required', [
-                        v.path.join('.'),
-                      ]);
-                    } else {
-                      switch (v.expected) {
+              if (t) {
+                let newMessage = null;
+                if (v.message.startsWith('zod.')) {
+                  switch (v.code) {
+                    case 'too_small':
+                      switch (v.origin) {
                         case 'string':
-                          newMessage = t('zod.generic.validString', [
+                          newMessage = t('zod.generic.stringMin', [
                             t(v.message),
-                          ]);
-                          break;
-                        case 'boolean':
-                          newMessage = t('zod.generic.validBoolean', [
-                            t(v.message),
+                            v.minimum,
                           ]);
                           break;
                         case 'number':
-                          newMessage = t('zod.generic.validNumber', [
+                          newMessage = t('zod.generic.numberMin', [
                             t(v.message),
-                          ]);
-                          break;
-                        case 'array':
-                          newMessage = t('zod.generic.validArray', [
-                            t(v.message),
+                            v.minimum,
                           ]);
                           break;
                       }
+                      break;
+                    case 'invalid_type': {
+                      if (v.input === null || v.input === undefined) {
+                        newMessage = t('zod.generic.required', [
+                          v.path.join('.'),
+                        ]);
+                      } else {
+                        switch (v.expected) {
+                          case 'string':
+                            newMessage = t('zod.generic.validString', [
+                              t(v.message),
+                            ]);
+                            break;
+                          case 'boolean':
+                            newMessage = t('zod.generic.validBoolean', [
+                              t(v.message),
+                            ]);
+                            break;
+                          case 'number':
+                            newMessage = t('zod.generic.validNumber', [
+                              t(v.message),
+                            ]);
+                            break;
+                          case 'array':
+                            newMessage = t('zod.generic.validArray', [
+                              t(v.message),
+                            ]);
+                            break;
+                        }
+                      }
+                      break;
                     }
-                    break;
                   }
                 }
+                if (newMessage) {
+                  m = newMessage;
+                } else {
+                  m = t(v.message);
+                }
               }
-              if (newMessage) {
-                m = newMessage;
-              } else {
-                m = t(v.message);
-              }
-            }
 
-            return m;
-          })
-          .join('; ');
+              return m;
+            })
+            .join('; ');
+        } catch {
+          message = error.issues
+            .map((v) => {
+              const path = v.path.join('.') || 'form';
+              if (v.code === 'too_small') {
+                return `${path}: ${v.message} (min ${v.minimum})`;
+              }
+              if (v.code === 'invalid_type') {
+                return v.input === null || v.input === undefined
+                  ? `${path}: ${v.message} (required)`
+                  : `${path}: ${v.message} (expected ${v.expected})`;
+              }
+              return `${path}: ${v.message}`;
+            })
+            .join('; ');
+        }
+        console.warn(`Validation failed (${event.path}): ${message}`);
+      } else if (error instanceof Error) {
+        message = `${message}: ${error.message}`;
+        console.error(`Validation failed (${event.path}): ${message}`);
       }
       const err = new Error(message);
       if (error instanceof Error) {
