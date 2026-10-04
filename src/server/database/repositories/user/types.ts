@@ -11,7 +11,7 @@ const username = z
 
 const password = z
   .string({ message: t('zod.user.password') })
-  .min(12, t('zod.user.password'))
+  .min(10, t('zod.user.password'))
   .pipe(safeStringRefine);
 
 const remember = z.boolean({ message: t('zod.user.remember') });
