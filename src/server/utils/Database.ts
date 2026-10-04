@@ -6,18 +6,24 @@ import { connect, type DBServiceType } from '#db/sqlite';
 
 let provider = null as never as DBServiceType;
 
-const startupPromise: Promise<void> = (async () => {
-  const db = await connect();
+const connectPromise: Promise<void> = connect().then((db) => {
   provider = db;
-  // Don't block API availability if the interface can't start
-  // (e.g. no kernel module, missing device). The UI stays usable,
-  // and `wg up` errors are surfaced in logs / on client operations.
-  try {
-    await WireGuard.Startup();
-  } catch (err) {
-    console.error('Failed to start WireGuard interface:', err);
-  }
-})();
+});
+
+void connectPromise
+  .then(async () => {
+    // Don't block API availability if the interface can't start
+    // (e.g. no kernel module, missing device). The UI stays usable,
+    // and `wg up` errors are surfaced in logs / on client operations.
+    try {
+      await WireGuard.Startup();
+    } catch (err) {
+      console.error('Failed to start WireGuard interface:', err);
+    }
+  })
+  .catch((err) => {
+    console.error('Database startup failed:', err);
+  });
 
 const createNode = (path: PropertyKey[]): unknown =>
   new Proxy(() => {}, {
@@ -25,7 +31,11 @@ const createNode = (path: PropertyKey[]): unknown =>
       return createNode([...path, prop]);
     },
     apply(_target, _thisArg, args) {
-      return startupPromise.then(() => {
+      // WireGuard.Startup() runs after connect() and calls Database.* itself,
+      // so callers must wait only for connectPromise - waiting for a promise
+      // that includes the caller's own execution would deadlock.
+      const ready = provider ? Promise.resolve() : connectPromise;
+      return ready.then(() => {
         const real = provider as unknown as Record<PropertyKey, unknown>;
         let scope: Record<PropertyKey, unknown> = real;
         for (const key of path.slice(0, -1)) {
