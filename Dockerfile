@@ -61,7 +61,7 @@ RUN mkdir -p /build/module && \
 FROM docker.io/library/node:24-alpine
 WORKDIR /app
 
-HEALTHCHECK --interval=1m --timeout=5s --retries=3 CMD /usr/bin/timeout 5s /bin/sh -c "/usr/bin/awg show | /bin/grep -q interface || exit 1"
+HEALTHCHECK --interval=1m --timeout=5s --retries=3 CMD /usr/bin/timeout 5s /bin/sh -c "(/usr/bin/wg show; /usr/bin/awg show) 2>/dev/null | /bin/grep -q interface || exit 1"
 
 # Copy build
 COPY --from=build /app/.output /app
