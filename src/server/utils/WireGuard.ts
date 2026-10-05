@@ -46,6 +46,32 @@ class WireGuard {
     const wgInterface = await Database.interfaces.get();
     await this.#saveWireguardConfig(wgInterface);
     await this.#syncWireguardConfig(wgInterface);
+    await this.#ensureSiteRoutes(wgInterface);
+  }
+
+  /**
+   * Install kernel routes for site-to-site subnets (serverAllowedIps).
+   *
+   * wg-quick adds routes for peer AllowedIPs only on `up`, but saveConfig
+   * syncs peers live via syncconf — without this the subnet would be
+   * accepted cryptographically yet unroutable until an interface restart.
+   */
+  async #ensureSiteRoutes(wgInterface: InterfaceType) {
+    const clients = await Database.clients.getAll();
+    for (const client of clients) {
+      if (!client.enabled) {
+        continue;
+      }
+      for (const cidr of client.serverAllowedIps ?? []) {
+        try {
+          await wg.routeReplace(cidr, wgInterface.name);
+        } catch (err) {
+          console.warn(
+            `Failed to add route ${cidr} for client ${client.id}: ${err}`
+          );
+        }
+      }
+    }
   }
 
   /**

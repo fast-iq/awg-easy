@@ -1,6 +1,7 @@
 import type { ZodSchema } from 'zod';
 import z from 'zod';
 import type { H3Event, EventHandlerRequest } from 'h3';
+import isCidr from 'is-cidr';
 
 export type ID = number;
 
@@ -17,6 +18,19 @@ export const safeStringRefine = z
     (v) => v !== '__proto__' && v !== 'constructor' && v !== 'prototype',
     { message: t('zod.stringMalformed') }
   );
+
+/**
+ * Default routes must never be delegated to a single peer.
+ */
+const BLOCKED_ROUTE_TARGETS = new Set(['0.0.0.0/0', '::/0']);
+
+/**
+ * Accepts a CIDR block or a bare IPv4/IPv6 address — both are valid
+ * WireGuard AllowedIPs / `ip route` targets. Used for Server Allowed IPs,
+ * which end up in shell commands (`ip route replace`), so it must be strict.
+ */
+export const isValidRouteTarget = (v: string): boolean =>
+  !BLOCKED_ROUTE_TARGETS.has(v) && (isCidr(v) !== 0 || isCidr(`${v}/32`) !== 0);
 
 export const EnabledSchema = z.boolean({ message: t('zod.enabled') });
 

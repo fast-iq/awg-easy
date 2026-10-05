@@ -41,9 +41,13 @@ const address6 = z
 
 const filter = z.string().optional();
 
-const serverAllowedIps = z.array(AddressSchema, {
-  message: t('zod.client.serverAllowedIps'),
-});
+const serverAllowedIps = z
+  .array(AddressSchema, {
+    message: t('zod.client.serverAllowedIps'),
+  })
+  .refine((ips) => ips.every((ip) => isValidRouteTarget(ip)), {
+    message: t('zod.interface.cidrValid'),
+  });
 
 export const ClientCreateSchema = z.object({
   name: name,

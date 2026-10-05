@@ -299,6 +299,18 @@ Endpoint = ${userConfig.host}:${userConfig.port}`;
     );
   },
 
+  // wg-quick installs routes for peer AllowedIPs only on `up`, while
+  // saveConfig applies peers live via syncconf — site-to-site subnets
+  // (serverAllowedIps) need an explicit route right away.
+  routeReplace: (cidr: string, infName: string) => {
+    if (!isValidRouteTarget(cidr)) {
+      throw new Error(
+        `Invalid CIDR or IP "${cidr}" in Server Allowed IPs of a client`
+      );
+    }
+    return exec(`ip route replace ${cidr} dev ${infName}`);
+  },
+
   dump: async (infName: string) => {
     const rawDump = await exec(`${wgExecutable} show ${infName} dump`, {
       log: false,
