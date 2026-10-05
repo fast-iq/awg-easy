@@ -15,6 +15,9 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
+    devices:
+      # required by the amneziawg-go userspace fallback (no kernel module)
+      - /dev/net/tun:/dev/net/tun
     environment:
       - INIT_ENABLED=true
       - INIT_HOST=test

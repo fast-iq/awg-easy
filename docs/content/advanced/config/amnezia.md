@@ -12,7 +12,7 @@ AmneziaWG adds multi-level transport-layer obfuscation by:
 
 These measures make it harder for third parties to analyze or identify your traffic, enhancing both privacy and security.
 
-When enabled, wg-easy will automatically detect whether the AmneziaWG kernel module is available. If it is not, the system will fall back to the standard WireGuard module.
+When enabled, wg-easy will automatically detect whether the AmneziaWG kernel module is available. If it is not, it falls back to the **amneziawg-go userspace daemon** (bundled in the image, started automatically by `awg-quick`; requires the `/dev/net/tun` device, which the provided `docker-compose.yml` maps into the container). Only if neither is available — or when forced — will it use the standard WireGuard module.
 
 To override this automatic detection, set the `OVERRIDE_AUTO_AWG` environment variable. By default, this variable is unset.
 

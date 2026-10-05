@@ -247,6 +247,23 @@ elif [ "$AWG_INSECURE" = "true" ]; then
   root_cmd sed -i "/^[[:space:]]*environment:/a\\       - INSECURE=true" "$COMPOSE_FILE"
 fi
 
+# --- /dev/net/tun (amneziawg-go userspace fallback) -------------------------
+if [ ! -c /dev/net/tun ]; then
+  log "Creating the missing /dev/net/tun device node on the host"
+  root_cmd mkdir -p /dev/net
+  root_cmd modprobe tun 2>/dev/null ||
+    root_cmd mknod -m 666 /dev/net/tun c 10 200 2>/dev/null ||
+    warn "/dev/net/tun is still missing — the amneziawg-go userspace fallback will not work"
+fi
+if ! grep -q '/dev/net/tun' "$COMPOSE_FILE"; then
+  if grep -qE '^[[:space:]]*cap_add:' "$COMPOSE_FILE"; then
+    root_cmd sed -i $'/^[[:space:]]*cap_add:/i\\\n    devices:\\\n      - /dev/net/tun:/dev/net/tun' "$COMPOSE_FILE"
+    log "Added the /dev/net/tun device to $COMPOSE_FILE"
+  else
+    warn "no cap_add found in $COMPOSE_FILE — add 'devices: [/dev/net/tun:/dev/net/tun]' manually for AmneziaWG userspace mode"
+  fi
+fi
+
 # --- host sysctls (persistent packet forwarding) -----------------------------
 log "Enabling packet forwarding on the host"
 root_cmd tee /etc/sysctl.d/99-awg-easy.conf >/dev/null <<'EOF'

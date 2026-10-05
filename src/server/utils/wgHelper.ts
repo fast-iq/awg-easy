@@ -15,10 +15,16 @@ if (WG_ENV.EXPERIMENTAL_AWG) {
   if (WG_ENV.OVERRIDE_AUTO_AWG !== undefined) {
     wgExecutable = WG_ENV.OVERRIDE_AUTO_AWG;
   } else {
-    // Try to detect amneziawg kernel module availability
+    // amneziawg kernel module first, otherwise the userspace daemon
+    // (amneziawg-go) — awg-quick falls back to it automatically when
+    // `ip link add type amneziawg` fails and the binary is in PATH.
     wgExecutable = await exec('modinfo amneziawg')
       .then(() => 'awg' as const)
-      .catch(() => 'wg' as const);
+      .catch(() =>
+        exec('command -v amneziawg-go')
+          .then(() => 'awg' as const)
+          .catch(() => 'wg' as const)
+      );
   }
 }
 

@@ -56,6 +56,17 @@ RUN mkdir -p /build/module && \
         echo "No kernel module - will use userspace only"; \
     fi
 
+# Build amneziawg-go userspace daemon (used by awg-quick when the kernel
+# module is unavailable, e.g. non-Alpine hosts)
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:alpine AS amneziawg_go_builder
+ARG TARGETARCH
+RUN apk add --no-cache git make
+RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git /build && \
+    cd /build && \
+    go get -u ./... && go mod tidy && \
+    GOOS=linux GOARCH=${TARGETARCH:-$(go env GOARCH)} CGO_ENABLED=0 make && \
+    chmod +x /build/amneziawg-go
+
 # Copy build result to a new image.
 # This saves a lot of disk space.
 FROM docker.io/library/node:24-alpine
@@ -79,6 +90,10 @@ RUN chmod +x /usr/local/bin/cli
 COPY --from=build /app/amneziawg-tools/src/wg /usr/bin/awg
 COPY --from=build /app/amneziawg-tools/src/wg-quick/linux.bash /usr/bin/awg-quick
 RUN chmod +x /usr/bin/awg /usr/bin/awg-quick
+# Copy amneziawg-go userspace daemon (must be in PATH under this exact name —
+# wg-quick/add_if falls back to `amneziawg-go <iface>` without the kernel module)
+COPY --from=amneziawg_go_builder /build/amneziawg-go /usr/bin/amneziawg-go
+RUN chmod +x /usr/bin/amneziawg-go
 
 # Copy pre-built kernel module if available
 COPY --from=kernel_module_builder /build/module /lib/modules/

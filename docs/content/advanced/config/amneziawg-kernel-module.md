@@ -6,10 +6,11 @@ This build includes support for the **AmneziaWG kernel module**, pre-built for A
 
 ### Implementation Details
 
-The Docker image includes two AmneziaWG components:
+The Docker image includes three AmneziaWG components:
 
 1. **amneziawg-tools** (`awg`, `awg-quick`) - Command-line tools for managing AmneziaWG
-2. **amneziawg.ko** - Pre-compiled kernel module for Alpine LTS kernel 6.12.50
+2. **amneziawg-go** - Userspace daemon used automatically when the kernel module is unavailable (requires `/dev/net/tun`)
+3. **amneziawg.ko** - Pre-compiled kernel module for Alpine LTS kernel 6.12.50
 
 Kernel Module Compatibility
 
@@ -49,6 +50,8 @@ services:
         cap_add:
             - NET_ADMIN
             - SYS_MODULE
+        devices:
+            - /dev/net/tun:/dev/net/tun # required by the amneziawg-go userspace fallback
         privileged: true
         ports:
             - '51820:51820/udp'
