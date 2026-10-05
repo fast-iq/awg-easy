@@ -2253,9 +2253,10 @@
 <h2 id="overview"><a class="toclink" href="#overview">Overview</a></h2>
 <p>This build includes support for the <strong>AmneziaWG kernel module</strong>, pre-built for Alpine Linux LTS kernel (6.12.50). The kernel module provides better performance than the userspace implementation.</p>
 <h3 id="implementation-details"><a class="toclink" href="#implementation-details">Implementation Details</a></h3>
-<p>The Docker image includes two AmneziaWG components:</p>
+<p>The Docker image includes three AmneziaWG components:</p>
 <ol>
 <li><strong>amneziawg-tools</strong> (<code>awg</code>, <code>awg-quick</code>) - Command-line tools for managing AmneziaWG</li>
+<li><strong>amneziawg-go</strong> - Userspace daemon used automatically when the kernel module is unavailable (requires <code>/dev/net/tun</code>)</li>
 <li><strong>amneziawg.ko</strong> - Pre-compiled kernel module for Alpine LTS kernel 6.12.50</li>
 </ol>
 <p>Kernel Module Compatibility</p>
@@ -2308,6 +2309,8 @@
 <span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_ADMIN</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYS_MODULE</span>
+<span class="w">        </span><span class="nt">devices</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/net/tun:/dev/net/tun</span><span class="w"> </span><span class="c1"># required by the amneziawg-go userspace fallback</span>
 <span class="w">        </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">'51820:51820/udp'</span>
