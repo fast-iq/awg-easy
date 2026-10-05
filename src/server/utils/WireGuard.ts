@@ -173,14 +173,32 @@ class WireGuard {
       enableIpv6: !WG_ENV.DISABLE_IPV6,
     });
   }
-
   async getClientQRCodeSVG({ clientId }: { clientId: ID }) {
     const config = await this.getClientConfiguration({ clientId });
-    return encodeQR(config, 'svg', {
-      ecc: 'high',
-      scale: 2,
-      encoding: 'byte',
-    });
+
+    // AmneziaWG configs can exceed 2.9 KB (the I1 decoy template alone is
+    // ~2.4 KB) while QR capacity at the strongest ECC is only 1273 bytes.
+    // Try progressively weaker error correction first; as a last resort drop
+    // the I1-I5 decoy templates — they are sender-local decoration, do not
+    // need to match the server and never affect the handshake.
+    const eccLevels = ['high', 'medium', 'quartile', 'low'] as const;
+    const tryEncode = (data: string): string | null => {
+      for (const ecc of eccLevels) {
+        try {
+          return encodeQR(data, 'svg', { ecc, scale: 2, encoding: 'byte' });
+        } catch {
+          // capacity overflow — try a weaker error correction level
+        }
+      }
+      return null;
+    };
+
+    const svg =
+      tryEncode(config) ?? tryEncode(config.replace(/^I[1-5] = .*$/gm, ''));
+    if (svg === null) {
+      throw new Error('Client configuration is too large for a QR code');
+    }
+    return svg;
   }
 
   cleanClientFilename(name: string): string {
