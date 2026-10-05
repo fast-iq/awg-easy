@@ -55,6 +55,66 @@ export default defineNuxtConfig({
         language: 'zh-CN',
         name: '简体中文',
       },
+      {
+        code: 'bn',
+        language: 'bn-BD',
+        name: 'বাংলা',
+      },
+      {
+        code: 'de',
+        language: 'de-DE',
+        name: 'Deutsch',
+      },
+      {
+        code: 'es',
+        language: 'es-ES',
+        name: 'Español',
+      },
+      {
+        code: 'fr',
+        language: 'fr-FR',
+        name: 'Français',
+      },
+      {
+        code: 'id',
+        language: 'id-ID',
+        name: 'Bahasa Indonesia',
+      },
+      {
+        code: 'it',
+        language: 'it-IT',
+        name: 'Italiano',
+      },
+      {
+        code: 'ko',
+        language: 'ko-KR',
+        name: '한국어',
+      },
+      {
+        code: 'pl',
+        language: 'pl-PL',
+        name: 'Polski',
+      },
+      {
+        code: 'pt-BR',
+        language: 'pt-BR',
+        name: 'Português (Brasil)',
+      },
+      {
+        code: 'tr',
+        language: 'tr-TR',
+        name: 'Türkçe',
+      },
+      {
+        code: 'uk',
+        language: 'uk-UA',
+        name: 'Українська',
+      },
+      {
+        code: 'zh-HK',
+        language: 'zh-HK',
+        name: '繁體中文（香港）',
+      },
     ],
     defaultLocale: 'en',
     vueI18n: './i18n.config.ts',
