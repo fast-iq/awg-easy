@@ -6,6 +6,7 @@ RUN npm install --global corepack@latest && corepack enable pnpm
 
 # Copy Web UI
 COPY src/package.json src/pnpm-lock.yaml ./
+COPY src/patches ./patches
 RUN pnpm install
 
 # Build UI
