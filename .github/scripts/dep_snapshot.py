@@ -24,6 +24,15 @@ def main() -> int:
     manifest = set(pkg.get("dependencies", {})) | set(pkg.get("devDependencies", {}))
 
     lock = open(lock_path).read()
+    # Slice at the LAST `packages:` marker. This repo's src/pnpm-lock.yaml
+    # carries a prepended root-workspace lock document (historical drift;
+    # pnpm tolerates it, so we do not rewrite the lock) and the real src
+    # `packages:` section is the second one. Parsing earlier content picks
+    # up non-installed entries (override keys like `esbuild@0.18.20:
+    # '>=0.25.11'`) which produced a phantom Dependabot alert.
+    pkg_idx = lock.rfind("\npackages:")
+    if pkg_idx != -1:
+        lock = lock[pkg_idx:]
     # package entries look like: `  name@1.2.3(peer@x):` (quotes optional)
     resolved = {}
     for name, ver in re.findall(r"^  '?([^'@][^:@]*|@[^:']+?)@([^:']+)'?:", lock, re.M):
