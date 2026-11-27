@@ -341,6 +341,8 @@ class WireGuard {
       await Database.audit
         .prune(90)
         .catch(() => WG_DEBUG('Audit log prune failed.'));
+      // daily registry block check for the server IP (fire-and-forget)
+      blockMonitorDailyTick();
     }
     // One Time Link Feature
     for (const client of clients) {

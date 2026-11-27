@@ -26,6 +26,7 @@ export const AUDIT_ACTIONS = [
   'admin.config_updated',
   'admin.backup_exported',
   'admin.migration_imported',
+  'monitor.block_status_changed',
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

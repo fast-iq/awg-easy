@@ -237,7 +237,21 @@
         "admin_hooks_updated": "Изменены хуки",
         "admin_config_updated": "Изменён конфиг клиентов",
         "admin_backup_exported": "Экспорт резервной копии",
-        "admin_migration_imported": "Импорт миграции"
+        "admin_migration_imported": "Импорт миграции",
+        "monitor_block_status_changed": "Мониторинг: сменился статус блокировки"
+      }
+    },
+    "blockStatus": {
+      "label": "Статус блокировки в реестре",
+      "checkNow": "Проверить сейчас",
+      "never": "Ещё не проверялось",
+      "in24": "заблокировано в /24: {n}",
+      "levels": {
+        "unknown": "Неизвестно",
+        "ok": "Не блокируется",
+        "watch": "Подсеть под наблюдением",
+        "high": "Подсеть активно блокируется",
+        "blocked": "ЗАБЛОКИРОВАН"
       }
     }
   },

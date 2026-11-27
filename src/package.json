@@ -38,6 +38,7 @@
     "consola": "^3.4.2",
     "debug": "^4.4.3",
     "drizzle-orm": "^0.45.4",
+    "fflate": "^0.8.3",
     "ip-bigint": "^10.0.4",
     "is-cidr": "^7.0.3",
     "is-ip": "^5.0.1",

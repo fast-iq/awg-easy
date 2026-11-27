@@ -233,7 +233,21 @@
         "admin_hooks_updated": "更新钩子",
         "admin_config_updated": "更新客户端配置",
         "admin_backup_exported": "导出数据库备份",
-        "admin_migration_imported": "导入迁移数据"
+        "admin_migration_imported": "导入迁移数据",
+        "monitor_block_status_changed": "监控：封锁状态变化"
+      }
+    },
+    "blockStatus": {
+      "label": "注册表封锁状态",
+      "checkNow": "立即检查",
+      "never": "尚未检查",
+      "in24": "/24 内已封锁 IP：{n}",
+      "levels": {
+        "unknown": "未知",
+        "ok": "未封锁",
+        "watch": "网段受关注",
+        "high": "网段正被封锁",
+        "blocked": "已封锁"
       }
     }
   },

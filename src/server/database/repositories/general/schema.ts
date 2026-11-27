@@ -20,6 +20,11 @@ export const general = sqliteTable('general_table', {
     .notNull()
     .default(false),
 
+  // registry block-monitor status (written by server/utils/blockMonitor only)
+  blockMonitor: text('block_monitor', { mode: 'json' }).$type<
+    import('#shared/utils/blockrisk').BlockStatusType | null
+  >(),
+
   createdAt: text('created_at')
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),

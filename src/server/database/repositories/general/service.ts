@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { BlockStatusType } from '#shared/utils/blockrisk';
 import { general } from './schema';
 import type { GeneralUpdateType } from './types';
 import type { DBType } from '#db/sqlite';
@@ -46,6 +47,21 @@ function createPreparedStatement(db: DBType) {
         setupStep: sql.placeholder('setupStep') as never as number,
       })
       .prepare(),
+    getBlockMonitor: db.query.general
+      .findFirst({
+        columns: {
+          blockMonitor: true,
+        },
+      })
+      .prepare(),
+    updateBlockMonitor: db
+      .update(general)
+      .set({
+        blockMonitor: sql.placeholder(
+          'blockMonitor'
+        ) as never as BlockStatusType | null,
+      })
+      .prepare(),
   };
 }
 
@@ -73,6 +89,18 @@ export class GeneralService {
 
   setSetupStep(step: number) {
     return this.#statements.updateSetupStep.execute({ setupStep: step });
+  }
+
+  /** last stored registry block-monitor status (null before first check) */
+  async getBlockMonitor() {
+    const result = await this.#statements.getBlockMonitor.execute();
+    return result?.blockMonitor ?? null;
+  }
+
+  setBlockMonitor(status: BlockStatusType | null) {
+    return this.#statements.updateBlockMonitor.execute({
+      blockMonitor: status,
+    });
   }
 
   /**

@@ -237,7 +237,21 @@
         "admin_hooks_updated": "Hooks updated",
         "admin_config_updated": "Client config updated",
         "admin_backup_exported": "Database backup exported",
-        "admin_migration_imported": "Migration imported"
+        "admin_migration_imported": "Migration imported",
+        "monitor_block_status_changed": "Monitor: block status changed"
+      }
+    },
+    "blockStatus": {
+      "label": "Registry block status",
+      "checkNow": "Check now",
+      "never": "Not checked yet",
+      "in24": "blocked IPs in /24: {n}",
+      "levels": {
+        "unknown": "Unknown",
+        "ok": "Not blocked",
+        "watch": "Range under watch",
+        "high": "Range actively blocked",
+        "blocked": "BLOCKED"
       }
     }
   },

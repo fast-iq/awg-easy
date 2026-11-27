@@ -10,13 +10,13 @@ import type { UserType } from '#db/repositories/user/types';
  * as performed); login_failed is intentionally logged on failure paths.
  */
 export function logAudit(
-  event: H3Event,
+  event: H3Event | null,
   user: Pick<UserType, 'id' | 'username'> | null,
   action: string,
   target = '',
   details?: Record<string, unknown> | null
 ) {
-  const ip = getRequestIP(event, { xForwardedFor: true }) ?? '';
+  const ip = event ? (getRequestIP(event, { xForwardedFor: true }) ?? '') : '';
   void Database.audit
     .create({
       userId: user?.id ?? null,
