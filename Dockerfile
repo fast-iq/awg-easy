@@ -167,9 +167,20 @@ COPY --from=build /app/server/database/migrations /app/server/database/migration
 # by the chunks). The old `rm -rf node_modules` (harmless on Nuxt 3, where nitro
 # bundled everything) makes every container crash on boot with
 # ERR_MODULE_NOT_FOUND 'vue' - caught by the PR smoke test.
+#
+# 'vue' also has to be installed explicitly: nitro's generated server
+# package.json lists vue-router/pinia but NOT vue itself (it is only their
+# PEER dependency), and any npm install prunes it as extraneous. Peer-dep
+# auto-install is disabled here (--legacy-peer-deps semantics of the old
+# command must stay off, but relying on npm peers across a hoisted pnpm
+# tree is fragile), so vue is requested by name.
 RUN cd /app/server && \
 
-	npm install --no-save --legacy-peer-deps libsql && \
+	if [ ! -d node_modules/vue-router ]; then npm cache clean --force || true; rm -rf node_modules; fi && \
+
+	npm install --no-save --omit=dev --no-audit --no-fund libsql && \
+
+	npm install --no-save --omit=dev --no-audit --no-fund vue && \
 
 	if [ -f package-lock.json ]; then rm package-lock.json; fi && \
 

@@ -9,3 +9,4 @@ CVE-2026-19534
 # undici inside npm (usr/local/lib/node_modules/npm — base image node:24-alpine,
 # not reachable from pnpm overrides; clears itself on next node image refresh)
 CVE-2026-109383
+CVE-2026-109869

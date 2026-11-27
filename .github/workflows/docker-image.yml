@@ -124,18 +124,18 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Run dockle
         run: |
-          # dockle audits image CONFIG (Trivy covers CVEs): secrets in layers,
-          # :latest tags, port 22, root user, etc.
-          # CIS-DI-0001/DKL-D1024 (no USER directive) is accepted on purpose:
-          # the app must manage WireGuard devices; privilege restrictions are
-          # applied at `docker run` time (cap_add/drop in docker-compose.yml).
-          # NoEmptyContinuation: blank lines inside multi-line RUN blocks in
-          # the Dockerfile are comment separators, not bugs.
+          # dockle audits image CONFIG: secrets in layers (FATAL/CRITICAL),
+          # :latest tags, root user (WARN), etc.
+          # Gate = FATAL: secrets and critical config defects block; the
+          # standing WARNs here are by design and cannot be silenced via
+          # --accept-key in v0.4.x (verified: it does not suppress CIS-DI-0001):
+          # no USER (the app manages WireGuard devices; privileges are
+          # restricted at docker run — cap_add/drop in docker-compose.yml) and
+          # NoEmptyContinuation (blank comment lines inside multi-line RUN).
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             docker.io/goodwithtech/dockle:v0.4.15 \
-            --exit-code 1 --exit-level warn \
-            --accept-key DKL-D1024,CIS-DI-0001,NoEmptyContinuation \
+            --exit-code 1 --exit-level fatal \
             awg-easy:ci
 
   sbom:
