@@ -135,7 +135,7 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             docker.io/goodwithtech/dockle:v0.4.15 \
             --exit-code 1 --exit-level warn \
-            --accept-key DKL-D1024 --accept-key CIS-DI-0001 --accept-key NoEmptyContinuation \
+            --accept-key DKL-D1024,CIS-DI-0001,NoEmptyContinuation \
             awg-easy:ci
 
   sbom:

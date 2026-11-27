@@ -38,6 +38,9 @@ jobs:
           pnpm install --lockfile-only
 
       - name: Commit and push changes
+        # push events only: PR runs check out a detached merge ref
+        # that cannot be pushed back; pnpm install above already validated the lock
+        if: github.event_name == 'push'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'

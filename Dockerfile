@@ -160,13 +160,20 @@ COPY --from=build /app/server/database/migrations /app/server/database/migration
 
 # libsql (https://github.com/nitrojs/nitro/issues/3328)
 
+#
+# npm-installs libsql (native binary) ON TOP of the build's server node_modules.
+# Do NOT delete node_modules first: since Nuxt 4.7 the server output is modular
+# (vue, vue-router, pinia, zod, drizzle-orm, ... are runtime externals imported
+# by the chunks). The old `rm -rf node_modules` (harmless on Nuxt 3, where nitro
+# bundled everything) makes every container crash on boot with
+# ERR_MODULE_NOT_FOUND 'vue' - caught by the PR smoke test.
 RUN cd /app/server && \
 
-	rm -rf node_modules package-lock.json && \
+	npm install --no-save --legacy-peer-deps libsql && \
 
-    npm install --no-save --legacy-peer-deps libsql && \
+	if [ -f package-lock.json ]; then rm package-lock.json; fi && \
 
-    rm -rf ~/.npm
+	rm -rf ~/.npm
 
 # cli
 
