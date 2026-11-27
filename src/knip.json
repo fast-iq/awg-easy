@@ -7,6 +7,7 @@
   "ignoreIssues": {
     "server/utils/Database.ts": ["exports"],
     "server/utils/WireGuard.ts": ["exports"],
+    "shared/utils/blockrisk.ts": ["exports"],
     "app/utils/types.ts": ["types"],
     "server/database/repositories/**/types.ts": ["types"]
   },

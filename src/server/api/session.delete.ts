@@ -12,7 +12,8 @@ export default defineEventHandler(async (event) => {
   await session.clear();
 
   const logoutUser = session.data.userId
-    ? await Database.users.get(session.data.userId).catch(() => null)
+    ? ((await Database.users.get(session.data.userId).catch(() => null)) ??
+      null)
     : null;
   logAudit(event, logoutUser, 'logout');
 

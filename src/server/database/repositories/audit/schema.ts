@@ -17,7 +17,7 @@ export const auditLog = sqliteTable(
       .default(sql`(CURRENT_TIMESTAMP)`),
     userId: int('user_id'),
     username: text().notNull(),
-    /** one of AuditAction (shared/utils/audit) */
+    /** one of AUDIT_ACTIONS (shared/utils/audit) */
     action: text().notNull(),
     /** short human-readable subject, e.g. client name or target user name */
     target: text().notNull().default(''),

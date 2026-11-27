@@ -29,8 +29,6 @@ export const AUDIT_ACTIONS = [
   'monitor.block_status_changed',
 ] as const;
 
-export type AuditAction = (typeof AUDIT_ACTIONS)[number];
-
 export type AuditLogEntryType = {
   id: number;
   ts: string;
