@@ -238,7 +238,8 @@ export async function runBlockMonitorCheck(
       const res = await fetchUrl(RANGES_URL);
       if (!res.ok || !res.body) {
         throw new Error(
-          `dump failed (${dumpError instanceof Error ? dumpError.message : String(dumpError)}); ranges HTTP ${res.status}`
+          `dump failed (${dumpError instanceof Error ? dumpError.message : String(dumpError)}); ranges HTTP ${res.status}`,
+          { cause: dumpError }
         );
       }
       scanned = await scanRangesText(res.body as never, ip);

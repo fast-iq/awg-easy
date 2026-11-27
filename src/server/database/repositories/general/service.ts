@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
-import type { BlockStatusType } from '#shared/utils/blockrisk';
 import { general } from './schema';
 import type { GeneralUpdateType } from './types';
+import type { BlockStatusType } from '#shared/utils/blockrisk';
 import type { DBType } from '#db/sqlite';
 
 function createPreparedStatement(db: DBType) {

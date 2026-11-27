@@ -1,7 +1,6 @@
 // Registry block-risk pure logic (shared/utils/blockrisk) + streaming dump
 // parsers (server/utils/blockMonitor scanZipDump/scanRangesText).
-import { readFileSync } from 'node:fs';
-import { mkdtempSync } from 'node:fs';
+import { readFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { expect, test } from 'vitest';
