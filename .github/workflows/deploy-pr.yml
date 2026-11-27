@@ -88,6 +88,13 @@ jobs:
             exit 1
           fi
 
+          # 1b) security headers from nuxt.config routeRules must be present
+          headers=$(curl -s -D - -o /dev/null http://localhost:3000/api/information)
+          echo "$headers" | grep -qi '^content-security-policy:' \
+            || { docker logs awg-smoke; echo "Smoke test failed: CSP header missing"; exit 1; }
+          echo "$headers" | grep -qi '^x-content-type-options: nosniff' \
+            || { docker logs awg-smoke; echo "Smoke test failed: nosniff header missing"; exit 1; }
+
           # 2) authenticated path: setup admin -> login -> DB-backed endpoints
           #    (catches broken migrations/Database proxy/repo regressions that
           #     used to pass the old static smoke test — see AGENTS p.45-47)
@@ -173,7 +180,6 @@ jobs:
 
       - name: OWASP ZAP baseline scan
         if: matrix.arch.platform == 'linux/amd64' && always()
-        continue-on-error: true # first pass: collect the report, tighten to blocking once triaged
         run: |
           # reuse the smoke container if it is up, otherwise start a fresh one
           if ! curl -sf http://localhost:3000/api/information > /dev/null; then
@@ -188,8 +194,12 @@ jobs:
             done
           fi
           mkdir -p zap-out
-          # host networking so ZAP reaches localhost:3000; -I: never fail on
-          # warnings, Medium+ findings go to the report artifact for triage
+          # the zap image runs as uid 1000 while the runner user is 1001 —
+          # without this the report write fails (AccessDenied /zap/wrk/...)
+          chmod 777 zap-out
+          # host networking so ZAP reaches localhost:3000; -I: warnings do
+          # not fail the scan — only High/Critical findings exit 1 (the
+          # first triaged baseline had FAIL=0; gate now blocks on High+)
           docker run --rm --network host \
             -v "$PWD/zap-out:/zap/wrk:rw" \
             docker.io/zaproxy/zap-stable:latest \

@@ -128,6 +128,31 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
   nitro: {
+    // Security headers (ZAP baseline triage). routeRules cover pages AND
+    // /api responses. CSP notes: everything is same-origin by design;
+    // 'unsafe-inline' for styles is required by inline style attributes
+    // (transitions, ApexCharts); scripts are strictly self (Nuxt emits
+    // external module scripts only). connect-src 'self' keeps the SSE
+    // stream and /_i18n message loads working.
+    routeRules: {
+      '/**': {
+        headers: {
+          'Content-Security-Policy':
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy':
+            'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+        },
+      },
+    },
+    hooks: {
+      // The SSR renderer hardcodes "x-powered-by: Nuxt"; strip it.
+      'render:response'(response: { headers?: Record<string, string> }) {
+        if (response.headers) delete response.headers['x-powered-by'];
+      },
+    },
     esbuild: {
       options: {
         // to support big int

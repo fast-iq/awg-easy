@@ -20,6 +20,10 @@ export async function useWGSession(event: H3Event, rememberMe = false) {
     cookie: {
       maxAge: rememberMe ? sessionConfig.sessionTimeout : undefined,
       secure: !WG_ENV.INSECURE,
+      // Explicit attribute (ZAP 10054); 'lax' matches the browser default
+      // and keeps top-level navigations working, cross-site POSTs are not
+      // a supported auth flow.
+      sameSite: 'lax',
     },
   });
 }
@@ -32,6 +36,7 @@ export async function getWGSession(event: H3Event) {
     maxAge: sessionConfig.sessionTimeout,
     cookie: {
       secure: !WG_ENV.INSECURE,
+      sameSite: 'lax',
     },
   });
 }
