@@ -60,12 +60,21 @@ jobs:
         if: matrix.arch.platform == 'linux/amd64'
         run: |
           # INSECURE=true: session cookie without the Secure flag so curl
-          # over plain http in CI can send it back (matches install.sh)
-          docker run -d --name awg-smoke -p 3000:3000 -e INSECURE=true ghcr.io/fast-iq/awg-easy:pr
+          # over plain http in CI can send it back (matches install.sh).
+          # PORT=3000: app defaults to 51821; keep the curl targets simple.
+          # NET_ADMIN/SYS_MODULE + /dev/net/tun: let wg-quick actually create
+          # wg0 (GitHub runner kernels have WireGuard built in); without these
+          # amneziawg-go userspace fallback hangs on TUN for ~60s before the
+          # server finishes booting (p.51).
+          docker run -d --name awg-smoke -p 3000:3000 \
+            -e INSECURE=true -e PORT=3000 \
+            --cap-add NET_ADMIN --cap-add SYS_MODULE \
+            --device /dev/net/tun \
+            ghcr.io/fast-iq/awg-easy:pr
 
           # 1) server responds (static health)
           ok=0
-          for i in $(seq 1 30); do
+          for i in $(seq 1 45); do
             if curl -sf http://localhost:3000/api/information > /dev/null; then
               echo "Server responds on /api/information"
               ok=1
@@ -75,7 +84,7 @@ jobs:
           done
           if [ "$ok" != "1" ]; then
             docker logs awg-smoke
-            echo "Smoke test failed: server did not respond within 60s"
+            echo "Smoke test failed: server did not respond within 90s"
             exit 1
           fi
 
@@ -157,8 +166,11 @@ jobs:
           # reuse the smoke container if it is up, otherwise start a fresh one
           if ! curl -sf http://localhost:3000/api/information > /dev/null; then
             docker start awg-smoke 2>/dev/null || \
-              docker run -d --name awg-smoke -p 3000:3000 -e INSECURE=true ghcr.io/fast-iq/awg-easy:pr
-            for i in $(seq 1 30); do
+              docker run -d --name awg-smoke -p 3000:3000 \
+                -e INSECURE=true -e PORT=3000 \
+                --cap-add NET_ADMIN --cap-add SYS_MODULE \
+                --device /dev/net/tun ghcr.io/fast-iq/awg-easy:pr
+            for i in $(seq 1 45); do
               curl -sf http://localhost:3000/api/information > /dev/null && break
               sleep 2
             done
