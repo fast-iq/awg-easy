@@ -4,7 +4,8 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  # contents: write is required by the dependency-graph snapshot submission API
+  contents: write
   pull-requests: read
 
 jobs:
@@ -20,6 +21,7 @@ jobs:
       # dependency graph would be empty and this review useless without
       # explicit snapshots. Submit head + base snapshots first.
       - name: Submit dependency snapshots
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
