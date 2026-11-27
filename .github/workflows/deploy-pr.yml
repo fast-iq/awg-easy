@@ -207,7 +207,7 @@ jobs:
           docker run --rm --network host \
             -v "$PWD/zap-out:/zap/wrk:rw" \
             docker.io/zaproxy/zap-stable:latest \
-            zap-baseline.py -t http://localhost:3000 -r zap-report.md -I
+            zap-baseline.py -t http://localhost:3000 -m zap-report.md -I
           ls -la zap-out/
 
       - name: Upload ZAP report
