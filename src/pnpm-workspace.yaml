@@ -8,6 +8,8 @@ overrides:
   ws@8.18.3: '>=8.21.0'
   koa@2.16.3: '>=2.16.4'
   source-map-js: ^1.2.2
+  # esbuild-kit (через drizzle-kit) тащит esbuild 0.18.20 — Dependabot GHSA dev-server CVE; бьём точечно по версии
+  esbuild@0.18.20: '>=0.25.11'
 # pnpm 11+ по умолчанию 24ч (supply-chain политика) — ломает CI на свежих релизах
 minimumReleaseAge: 0
 allowBuilds:
