@@ -147,12 +147,6 @@ export default defineNuxtConfig({
         },
       },
     },
-    hooks: {
-      // The SSR renderer hardcodes "x-powered-by: Nuxt"; strip it.
-      'render:response'(response: { headers?: Record<string, string> }) {
-        if (response.headers) delete response.headers['x-powered-by'];
-      },
-    },
     esbuild: {
       options: {
         // to support big int

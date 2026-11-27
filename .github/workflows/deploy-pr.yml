@@ -94,6 +94,10 @@ jobs:
             || { docker logs awg-smoke; echo "Smoke test failed: CSP header missing"; exit 1; }
           echo "$headers" | grep -qi '^x-content-type-options: nosniff' \
             || { docker logs awg-smoke; echo "Smoke test failed: nosniff header missing"; exit 1; }
+          # x-powered-by is stripped by the nitro render plugin (SSR pages)
+          page_headers=$(curl -s -D - -o /dev/null http://localhost:3000/login)
+          echo "$page_headers" | grep -qi '^x-powered-by' \
+            && { docker logs awg-smoke; echo "Smoke test failed: x-powered-by still set on SSR page"; exit 1; }
 
           # 2) authenticated path: setup admin -> login -> DB-backed endpoints
           #    (catches broken migrations/Database proxy/repo regressions that
