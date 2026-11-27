@@ -10,3 +10,6 @@ CVE-2026-19534
 # not reachable from pnpm overrides; clears itself on next node image refresh)
 CVE-2026-109383
 CVE-2026-109869
+
+# undici TLS renegotiation DoS (base-image npm; same class as above)
+CVE-2026-87018

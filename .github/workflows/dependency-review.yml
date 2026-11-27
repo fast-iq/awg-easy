@@ -21,7 +21,7 @@ jobs:
       # explicit snapshots. Submit head + base snapshots first.
       - name: Submit dependency snapshots
         env:
-          GITHUB_TOKEN: ***}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_REF: refs/pull/${{ github.event.pull_request.number }}/merge
           GITHUB_API_URL: ${{ github.api_url }}
