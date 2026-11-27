@@ -28,24 +28,46 @@ export type ClientPersist = {
 
 export const useClientsStore = defineStore('Clients', () => {
   const globalStore = useGlobalStore();
-  const clients = ref<null | LocalClient[]>(null);
+  const allClients = ref<null | LocalClient[]>(null);
   const clientsPersist = ref<Record<string, ClientPersist>>({});
 
   const searchParams = ref({
     filter: undefined as string | undefined,
-    // Backend sorts by name; direction follows the UI toggle.
-    sort: computed(() => (globalStore.sortClient ? 'asc' : 'desc')),
+  });
+
+  /**
+   * Search and sort run on the full snapshot client-side: the SSE stream
+   * always carries every (visible to this user) client, so filtering never
+   * needs a round trip. Mirrors the backend LIKE filter: name, IPv4, IPv6.
+   */
+  const clients = computed(() => {
+    let list = allClients.value;
+    if (list === null) {
+      return null;
+    }
+    const filter = searchParams.value.filter;
+    if (filter) {
+      const needle = filter.toLowerCase();
+      list = list.filter((client) =>
+        [client.name, client.ipv4Address, client.ipv6Address].some((value) =>
+          value?.toLowerCase().includes(needle)
+        )
+      );
+    }
+    const direction = globalStore.sortClient ? 1 : -1;
+    return [...list].sort((a, b) => direction * a.name.localeCompare(b.name));
   });
 
   const { data: _clients, refresh: _refresh } = useFetch('/api/client', {
     method: 'get',
-    params: searchParams,
   });
 
   // TODO: rewrite
-  async function refresh({ updateCharts = false } = {}) {
-    await _refresh();
-    const transformedClients = _clients.value?.map((client) => {
+  function applyData(
+    data: undefined | WGClientReturn[],
+    { updateCharts = false } = {}
+  ) {
+    const transformedClients = data?.map((client) => {
       let avatar = undefined;
       if (client.name.includes('@') && client.name.includes('.')) {
         avatar = `https://gravatar.com/avatar/${sha256(client.name.toLowerCase().trim())}.jpg`;
@@ -66,12 +88,6 @@ export const useClientsStore = defineStore('Clients', () => {
 
       // We know that this can't be undefined
       const clientPersist = clientsPersist.value[client.id]!;
-
-      // Debug
-      // client.transferRx = this.clientsPersist[client.id].transferRxPrevious + Math.random() * 1000;
-      // client.transferTx = this.clientsPersist[client.id].transferTxPrevious + Math.random() * 1000;
-      // client.latestHandshakeAt = new Date();
-      // this.requiresPassword = true;
 
       clientPersist.transferRxCurrent =
         (client.transferRx ?? 0) - clientPersist.transferRxPrevious;
@@ -127,14 +143,62 @@ export const useClientsStore = defineStore('Clients', () => {
       };
     });
 
-    // Sorting happens on the backend (see /api/client?sort=asc|desc).
-    clients.value = transformedClients ?? null;
+    allClients.value = transformedClients ?? null;
+  }
+
+  async function refresh({ updateCharts = false } = {}) {
+    await _refresh();
+    applyData(_clients.value, { updateCharts });
+  }
+
+  // ---- SSE (primary live source; REST refresh stays as the fallback) ----
+
+  const sseActive = ref(false);
+  let source: EventSource | null = null;
+
+  function connectSSE() {
+    if (source !== null || typeof EventSource === 'undefined') {
+      return;
+    }
+    source = new EventSource('/api/sse');
+    source.onopen = () => {
+      sseActive.value = true;
+    };
+    source.onmessage = (message) => {
+      sseActive.value = true;
+      try {
+        const data = JSON.parse(message.data) as WGClientReturn[];
+        applyData(data, { updateCharts: globalStore.uiShowCharts });
+      } catch (err) {
+        console.error('SSE payload parse failed', err);
+      }
+    };
+    source.onerror = () => {
+      // browser reconnects automatically; poll in the meantime
+      sseActive.value = false;
+    };
+  }
+
+  function disconnectSSE() {
+    if (source !== null) {
+      source.close();
+      source = null;
+    }
+    sseActive.value = false;
   }
 
   function setSearchQuery(filter: string) {
-    clients.value = null;
     searchParams.value.filter = filter || undefined;
   }
 
-  return { clients, clientsPersist, refresh, _clients, setSearchQuery };
+  return {
+    clients,
+    clientsPersist,
+    refresh,
+    _clients,
+    setSearchQuery,
+    sseActive,
+    connectSSE,
+    disconnectSSE,
+  };
 });

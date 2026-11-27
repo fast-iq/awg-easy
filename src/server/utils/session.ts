@@ -87,6 +87,8 @@ export async function getCurrentUser(event: H3Event) {
         statusMessage: 'Session failed',
       });
     }
+
+    user = foundUser;
   } else {
     throw createError({
       statusCode: 401,

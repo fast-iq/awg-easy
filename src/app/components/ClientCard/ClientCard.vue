@@ -5,7 +5,7 @@
   >
     <div class="flex w-full items-center gap-3 md:gap-4">
       <ClientCardAvatar :client="client" />
-      <div class="flex w-full flex-col gap-2 xxs:flex-row">
+      <div class="xxs:flex-row flex w-full flex-col gap-2">
         <div class="flex flex-grow flex-col gap-1">
           <ClientCardName :client="client" />
           <div

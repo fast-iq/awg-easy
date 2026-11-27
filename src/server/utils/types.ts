@@ -2,6 +2,7 @@ import type { ZodSchema } from 'zod';
 import z from 'zod';
 import type { H3Event, EventHandlerRequest } from 'h3';
 import isCidr from 'is-cidr';
+import { roles } from '#shared/utils/permissions';
 
 export type ID = number;
 
@@ -31,6 +32,13 @@ const BLOCKED_ROUTE_TARGETS = new Set(['0.0.0.0/0', '::/0']);
  */
 export const isValidRouteTarget = (v: string): boolean =>
   !BLOCKED_ROUTE_TARGETS.has(v) && (isCidr(v) !== 0 || isCidr(`${v}/32`) !== 0);
+
+/**
+ * WireGuard public/private key: 32 bytes base64 (44 chars ending with '=')
+ */
+export const WireGuardKeySchema = z
+  .string({ message: t('zod.stringMalformed') })
+  .regex(/^[A-Za-z0-9+/]{43}=$/, t('zod.stringMalformed'));
 
 export const EnabledSchema = z.boolean({ message: t('zod.enabled') });
 
@@ -192,3 +200,48 @@ export function validateZod<T>(
 export function assertUnreachable(_: never): never {
   throw new Error("Didn't expect to get here");
 }
+
+const adminUsername = z
+  .string({ message: t('zod.user.username') })
+  .min(2, t('zod.user.username'))
+  .pipe(safeStringRefine);
+
+const adminPassword = z
+  .string({ message: t('zod.user.password') })
+  .min(10, t('zod.user.password'))
+  .pipe(safeStringRefine);
+
+const adminName = z
+  .string({ message: t('zod.user.name') })
+  .min(1, t('zod.user.name'))
+  .pipe(safeStringRefine);
+
+const adminEmail = z
+  .string({ message: t('zod.user.email') })
+  .min(5, t('zod.user.email'))
+  .email({ message: t('zod.user.emailInvalid') })
+  .pipe(safeStringRefine)
+  .nullable();
+
+const adminRole = z.union([z.literal(roles.ADMIN), z.literal(roles.CLIENT)], {
+  message: t('zod.user.role'),
+});
+
+export const UserAdminIdSchema = z.object({
+  userId: z.coerce.number({ message: t('zod.user.id') }),
+});
+
+export const UserAdminCreateSchema = z.object({
+  username: adminUsername,
+  password: adminPassword,
+  role: adminRole,
+});
+
+export const UserAdminUpdateSchema = z.object({
+  name: adminName,
+  email: adminEmail,
+  role: adminRole,
+  enabled: EnabledSchema,
+  // optional: absent or empty string means "keep current password"
+  password: adminPassword.optional().or(z.literal('')),
+});

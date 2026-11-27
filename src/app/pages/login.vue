@@ -8,7 +8,7 @@
     >
       <!-- Avatar -->
       <div
-        class="mx-auto mb-5 mt-5 h-20 w-20 overflow-hidden rounded-full bg-red-800 dark:bg-red-800"
+        class="mx-auto mt-5 mb-5 h-20 w-20 overflow-hidden rounded-full bg-red-800 dark:bg-red-800"
       >
         <IconsAvatar class="m-5 h-10 w-10 text-white dark:text-white" />
       </div>

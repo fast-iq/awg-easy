@@ -70,6 +70,10 @@ export type Permissions = {
     dataType: UserType;
     action: 'update';
   };
+  users: {
+    dataType: never;
+    action: 'view' | 'create' | 'update' | 'delete';
+  };
 };
 
 export const ROLES = {
@@ -87,6 +91,12 @@ export const ROLES = {
     me: {
       update: (loggedIn, toChange) => loggedIn.id === toChange.id,
     },
+    users: {
+      view: true,
+      create: true,
+      update: true,
+      delete: true,
+    },
   },
   CLIENT: {
     clients: {
@@ -101,6 +111,12 @@ export const ROLES = {
     },
     me: {
       update: (loggedIn, toChange) => loggedIn.id === toChange.id,
+    },
+    users: {
+      view: false,
+      create: false,
+      update: false,
+      delete: false,
     },
   },
 } as const satisfies RolesWithPermissions;

@@ -18,6 +18,7 @@ export const GeneralUpdateSchema = z.object({
   metricsPrometheus: metricsEnabled,
   metricsJson: metricsEnabled,
   metricsPassword: metricsPassword,
+  autoDeleteExpiredClients: metricsEnabled,
 });
 
 export type GeneralUpdateType = z.infer<typeof GeneralUpdateSchema>;

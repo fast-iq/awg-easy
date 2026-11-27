@@ -59,6 +59,16 @@ class DBService {
     this.hooks = new HooksService(db);
     this.oneTimeLinks = new OneTimeLinkService(db);
   }
+
+  /**
+   * Consistent online backup (WAL-aware): SQLite copies the live database
+   * to `destination` in one atomic snapshot — a plain file copy could miss
+   * WAL pages or catch a half-written state.
+   */
+  async backup(destination: string) {
+    await client.execute({ sql: 'VACUUM INTO ?', args: [destination] });
+    return destination;
+  }
 }
 
 export type DBType = typeof db;

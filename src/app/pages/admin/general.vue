@@ -8,6 +8,12 @@
           :label="$t('admin.general.sessionTimeout')"
           :description="$t('admin.general.sessionTimeoutDesc')"
         />
+        <FormSwitchField
+          id="autoDeleteExpiredClients"
+          v-model="data.autoDeleteExpiredClients"
+          :label="$t('admin.general.autoDeleteExpired')"
+          :description="$t('admin.general.autoDeleteExpiredDesc')"
+        />
       </FormGroup>
       <FormGroup>
         <FormHeading>{{ $t('admin.general.metrics') }}</FormHeading>
@@ -34,6 +40,17 @@
         <FormHeading>{{ $t('form.actions') }}</FormHeading>
         <FormPrimaryActionField type="submit" :label="$t('form.save')" />
         <FormSecondaryActionField :label="$t('form.revert')" @click="revert" />
+      </FormGroup>
+      <FormGroup>
+        <FormHeading>{{ $t('admin.general.backup') }}</FormHeading>
+        <a href="/api/admin/backup" download>
+          <BaseSecondaryButton as="span">
+            {{ $t('admin.general.downloadBackup') }}
+          </BaseSecondaryButton>
+        </a>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ $t('admin.general.backupDesc') }}
+        </p>
       </FormGroup>
     </FormElement>
   </main>

@@ -6,6 +6,7 @@
         <PanelHeadBoat>
           <ClientsSearch />
           <ClientsSort />
+          <ClientsExport />
           <ClientsNew />
         </PanelHeadBoat>
       </PanelHead>
@@ -40,11 +41,16 @@ const clientsStore = useClientsStore();
 
 const intervalId = ref<NodeJS.Timeout | null>(null);
 
-clientsStore.refresh();
+clientsStore.refresh().catch(console.error);
 
 onMounted(() => {
-  // TODO?: replace with websocket or similar
+  // SSE is the primary live source; the interval below is a fallback that
+  // only polls while SSE is down (proxy issues, disconnects, etc.)
+  clientsStore.connectSSE();
   intervalId.value = setInterval(() => {
+    if (clientsStore.sseActive) {
+      return;
+    }
     clientsStore
       .refresh({
         updateCharts: globalStore.uiShowCharts,
@@ -54,6 +60,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  clientsStore.disconnectSSE();
   if (intervalId.value !== null) {
     clearInterval(intervalId.value);
     intervalId.value = null;

@@ -4,8 +4,7 @@
     <template #title>{{ $t('client.deleteClient') }}</template>
     <template #description>
       {{ $t('client.deleteDialog1') }}
-      <strong>{{ clientName }}</strong
-      >? {{ $t('client.deleteDialog2') }}
+      <strong>{{ clientName }}</strong>? {{ $t('client.deleteDialog2') }}
     </template>
     <template #actions>
       <DialogClose as-child>

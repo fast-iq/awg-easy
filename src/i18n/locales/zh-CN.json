@@ -7,7 +7,8 @@
       "general": "通用设置",
       "config": "网络配置",
       "interface": "接口配置",
-      "hooks": "钩子脚本"
+      "hooks": "钩子脚本",
+      "users": "用户"
     }
   },
   "user": {
@@ -113,7 +114,8 @@
     "hooks": "钩子脚本",
     "hooksDescription": "钩子脚本仅在使用wg-quick时有效",
     "hooksLeaveEmpty": "如果不使用wg-quick，请留空此字段",
-    "search": "搜索客户端..."
+    "search": "搜索客户端...",
+    "exportCsv": "导出 CSV"
   },
   "dialog": {
     "change": "确认修改",
@@ -145,7 +147,12 @@
       "json": "JSON格式",
       "jsonDesc": "获取JSON格式的监控数据路由",
       "prometheus": "Prometheus格式",
-      "prometheusDesc": "获取Prometheus格式监控数据的路由"
+      "prometheusDesc": "获取Prometheus格式监控数据的路由",
+      "autoDeleteExpired": "自动删除过期客户端",
+      "autoDeleteExpiredDesc": "完全删除过期客户端，而不仅仅是禁用",
+      "backup": "备份",
+      "downloadBackup": "下载数据库备份",
+      "backupDesc": "下载整个数据库的一致副本（.db）。请安全保存：其中包含密码哈希。"
     },
     "config": {
       "connection": "连接设置",
@@ -170,7 +177,27 @@
       "restartWarn": "确定要重启接口吗？这将断开所有客户端的连接。",
       "restartSuccess": "接口重启成功"
     },
-    "introText": "欢迎使用管理控制台。\n\n您可以在这里管理通用设置、网络配置、接口配置和钩子脚本。\n\n请从侧边栏选择一个功能模块开始。"
+    "introText": "欢迎使用管理控制台。\n\n您可以在这里管理通用设置、网络配置、接口配置和钩子脚本。\n\n请从侧边栏选择一个功能模块开始。",
+    "users": {
+      "username": "用户名",
+      "name": "姓名",
+      "email": "邮箱",
+      "role": "角色",
+      "roleAdmin": "管理员",
+      "roleClient": "客户",
+      "enabled": "已启用",
+      "twoFactor": "双重验证",
+      "clients": "客户端",
+      "createUser": "创建用户",
+      "editUser": "编辑用户",
+      "createUserDesc": "创建具有角色的新用户",
+      "editUserDesc": "更新此用户，可选择重置密码",
+      "deleteUser": "删除用户",
+      "deleteUserDesc": "确定要删除此用户吗？此操作无法撤销。",
+      "newPassword": "新密码",
+      "newPasswordDesc": "留空则保留当前密码",
+      "delete": "删除"
+    }
   },
   "zod": {
     "generic": {

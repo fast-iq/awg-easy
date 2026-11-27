@@ -18,6 +18,8 @@ export type InterfaceUpdateType = Omit<
 const device = z
   .string({ message: t('zod.interface.device') })
   .min(1, t('zod.interface.device'))
+  // kernel WireGuard interface name limit
+  .regex(/^[A-Za-z0-9_.-]{1,15}$/, t('zod.interface.device'))
   .pipe(safeStringRefine);
 
 const cidr = z

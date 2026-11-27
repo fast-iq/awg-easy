@@ -10,8 +10,8 @@ export default defineSetupEventHandler('migrate', async ({ event }) => {
 
   const schema = z.object({
     server: z.object({
-      privateKey: z.string(),
-      publicKey: z.string(),
+      privateKey: WireGuardKeySchema,
+      publicKey: WireGuardKeySchema,
       // only used for cidr
       address: z.string(),
     }),
@@ -22,9 +22,9 @@ export default defineSetupEventHandler('migrate', async ({ event }) => {
         id: z.string().optional(),
         name: z.string(),
         address: z.string(),
-        privateKey: z.string(),
-        publicKey: z.string(),
-        preSharedKey: z.string(),
+        privateKey: WireGuardKeySchema,
+        publicKey: WireGuardKeySchema,
+        preSharedKey: WireGuardKeySchema,
         createdAt: z.string(),
         updatedAt: z.string(),
         enabled: z.boolean(),

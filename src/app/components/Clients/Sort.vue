@@ -11,10 +11,9 @@
 
 <script setup lang="ts">
 const globalStore = useGlobalStore();
-const clientsStore = useClientsStore();
 
 function toggleSort() {
+  // sorting happens in the store's computed — no refetch needed
   globalStore.sortClient = !globalStore.sortClient;
-  clientsStore.refresh().catch(console.error);
 }
 </script>

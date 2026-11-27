@@ -14,10 +14,10 @@
       "
     >
       <div
-        class="absolute -bottom-1 -right-1 h-4 w-4 animate-ping rounded-full bg-red-100 p-1 dark:bg-red-100"
+        class="absolute -right-1 -bottom-1 h-4 w-4 animate-ping rounded-full bg-red-100 p-1 dark:bg-red-100"
       />
       <div
-        class="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-red-800 dark:bg-red-600"
+        class="absolute right-0 bottom-0 h-2 w-2 rounded-full bg-red-800 dark:bg-red-600"
       />
     </div>
   </div>

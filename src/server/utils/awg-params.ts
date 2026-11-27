@@ -86,7 +86,13 @@ export function generateAwgObfuscationParams(): AwgObfuscationParams {
 
   // S1-S4: Header junk sizes
   const s1 = randomInt(S_MIN, Math.min(S_MAX, S1_MAX_MTU));
-  const s2 = randomInt(S_MIN, Math.min(S_MAX, S2_MAX_MTU));
+  let s2 = randomInt(S_MIN, Math.min(S_MAX, S2_MAX_MTU));
+  // full initiation size is 148+s1, full response size is 92+s2;
+  // s2 === s1+56 would make them collide and the receiver could not
+  // tell initiation from response by size — reroll
+  while (s2 === s1 + 56) {
+    s2 = randomInt(S_MIN, Math.min(S_MAX, S2_MAX_MTU));
+  }
 
   // Generate non-overlapping magic headers
   const [h1, h2, h3, h4] = generateMagicHeaders();

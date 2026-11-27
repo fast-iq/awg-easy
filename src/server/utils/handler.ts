@@ -1,6 +1,8 @@
 import type { EventHandlerRequest, EventHandlerResponse, H3Event } from 'h3';
 import type { UserType } from '#db/repositories/user/types';
 import type { SetupStepType } from '#db/repositories/general/types';
+import type { ClientType } from '#db/repositories/client/types';
+import { ClientGetSchema } from '#db/repositories/client/types';
 import {
   type Permissions,
   hasPermissionsWithData,
@@ -61,6 +63,34 @@ export const definePermissionEventHandler = <
 
     return response;
   });
+};
+
+/**
+ * Resolve the route `:clientId` to a client row, 404 when it does not
+ * exist, then check permissions (order matters: a missing client must
+ * not reach the permission check with `undefined` data).
+ */
+export const getAuthorizedClient = async (
+  event: H3Event<EventHandlerRequest>,
+  checkPermissions: (data: Pick<ClientType, 'id' | 'userId'>) => true
+) => {
+  const { clientId } = await getValidatedRouterParams(
+    event,
+    validateZod(ClientGetSchema, event)
+  );
+
+  const client = await Database.clients.get(clientId);
+
+  if (!client) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Client not found',
+    });
+  }
+
+  checkPermissions(client);
+
+  return client;
 };
 
 // which api route is allowed for each setup step

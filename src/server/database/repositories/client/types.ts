@@ -22,10 +22,12 @@ const name = z
   .min(1, t('zod.client.name'))
   .pipe(safeStringRefine);
 
-// TODO?: validate iso string
 const expiresAt = z
   .string({ message: t('zod.client.expiresAt') })
   .min(1, t('zod.client.expiresAt'))
+  .refine((v) => !Number.isNaN(new Date(v).getTime()), {
+    message: t('zod.client.expiresAt'),
+  })
   .pipe(safeStringRefine)
   .nullable();
 

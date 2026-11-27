@@ -38,8 +38,9 @@ const dbAdminReset = defineCommand({
       consola.error('Password is required');
       return;
     }
-    if (password.length < 12) {
-      consola.error('Password must be at least 12 characters long');
+    // keep in sync with the zod schema (user/types.ts: min(10))
+    if (password.length < 10) {
+      consola.error('Password must be at least 10 characters long');
       return;
     }
     console.info('Setting new password for admin user...');

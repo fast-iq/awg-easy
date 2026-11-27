@@ -40,13 +40,25 @@ function applyDumpToClients(clients: ClientWithDump[], dump: DumpEntry[]) {
 
 class WireGuard {
   /**
+   * UI saves, the cron job, and CLI operations can legitimately
+   * call saveConfig concurrently; without serialization their file writes
+   * and `syncconf` runs interleave and a partially written config can be
+   * applied. Every saveConfig appends to this chain and awaits its own link.
+   */
+  #saveConfigLock: Promise<void> = Promise.resolve();
+
+  /**
    * Save and sync config
    */
   async saveConfig() {
-    const wgInterface = await Database.interfaces.get();
-    await this.#saveWireguardConfig(wgInterface);
-    await this.#syncWireguardConfig(wgInterface);
-    await this.#ensureSiteRoutes(wgInterface);
+    const run = this.#saveConfigLock.then(async () => {
+      const wgInterface = await Database.interfaces.get();
+      await this.#saveWireguardConfig(wgInterface);
+      await this.#syncWireguardConfig(wgInterface);
+      await this.#ensureSiteRoutes(wgInterface);
+    });
+    this.#saveConfigLock = run.catch(() => {});
+    return run;
   }
 
   /**
@@ -301,6 +313,7 @@ class WireGuard {
 
   async cronJob() {
     const clients = await Database.clients.getAll();
+    const { autoDeleteExpiredClients } = await Database.general.getConfig();
     let needsSave = false;
     // Expires Feature
     for (const client of clients) {
@@ -309,8 +322,13 @@ class WireGuard {
         client.expiresAt !== null &&
         new Date() > new Date(client.expiresAt)
       ) {
-        WG_DEBUG(`Client ${client.id} expired.`);
-        await Database.clients.toggle(client.id, false);
+        if (autoDeleteExpiredClients) {
+          WG_DEBUG(`Client ${client.id} expired — deleting.`);
+          await Database.clients.delete(client.id);
+        } else {
+          WG_DEBUG(`Client ${client.id} expired — disabling.`);
+          await Database.clients.toggle(client.id, false);
+        }
         needsSave = true;
       }
     }

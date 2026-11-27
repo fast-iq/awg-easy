@@ -1,8 +1,9 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { TOTP } from 'otpauth';
 import { user } from './schema';
 import type { UserType } from './types';
 import type { DBType } from '#db/sqlite';
+import type { Role } from '#shared/utils/permissions';
 
 type LoginResult =
   | {
@@ -70,7 +71,11 @@ export class UserService {
     return this.#statements.findByUsername.execute({ username });
   }
 
-  async create(username: string, password: string) {
+  /**
+   * @param role optional explicit role; defaults to ADMIN for the very
+   * first user (setup) and CLIENT afterwards — the historical behaviour.
+   */
+  async create(username: string, password: string, role?: Role) {
     const hash = await hashPassword(password);
 
     return this.#db.transaction(async (tx) => {
@@ -91,11 +96,51 @@ export class UserService {
         username,
         email: null,
         name: 'Administrator',
-        role: userCount === 0 ? roles.ADMIN : roles.CLIENT,
+        role: role ?? (userCount === 0 ? roles.ADMIN : roles.CLIENT),
         totpVerified: false,
         enabled: true,
       });
     });
+  }
+
+  /** number of enabled admins, optionally excluding one user (for self-checks) */
+  async countActiveAdmins(excludeId?: ID) {
+    return this.#db.$count(
+      user,
+      excludeId === undefined
+        ? and(eq(user.role, roles.ADMIN), eq(user.enabled, true))
+        : and(
+            eq(user.role, roles.ADMIN),
+            eq(user.enabled, true),
+            sql`${user.id} != ${excludeId}`
+          )
+    );
+  }
+
+  async updateRole(id: ID, role: Role) {
+    return this.#db.update(user).set({ role }).where(eq(user.id, id)).execute();
+  }
+
+  async toggle(id: ID, enabled: boolean) {
+    return this.#db
+      .update(user)
+      .set({ enabled })
+      .where(eq(user.id, id))
+      .execute();
+  }
+
+  /** admin reset: set a new password without knowing the current one */
+  async setPassword(id: ID, newPassword: string) {
+    const hash = await hashPassword(newPassword);
+    return this.#db
+      .update(user)
+      .set({ password: hash })
+      .where(eq(user.id, id))
+      .execute();
+  }
+
+  async delete(id: ID) {
+    return this.#db.delete(user).where(eq(user.id, id)).execute();
   }
 
   async update(id: ID, name: string, email: string | null) {

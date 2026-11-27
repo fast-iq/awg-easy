@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+
+/* darkMode: 'selector' equivalent — @eschricht/nuxt-color-mode toggles .dark on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* extra breakpoints (v4 defaults already cover sm..2xl with the same values) */
+  --breakpoint-xxs: 450px;
+  --breakpoint-xs: 576px;
+}

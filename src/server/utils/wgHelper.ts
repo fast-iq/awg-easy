@@ -1,5 +1,6 @@
 import { parseCidr } from 'cidr-tools';
 import { stringifyIp } from 'ip-bigint';
+import { isIPv6 } from 'is-ip';
 import type { ClientType } from '#db/repositories/client/types';
 import type { InterfaceType } from '#db/repositories/interface/types';
 import type { UserConfigType } from '#db/repositories/userConfig/types';
@@ -29,6 +30,10 @@ if (WG_ENV.EXPERIMENTAL_AWG) {
 }
 
 export const isUsingAwg = () => wgExecutable === 'awg';
+
+/** IPv6 literals must be bracketed in Endpoint= (wg-quick requirement) */
+export const formatEndpoint = (host: string, port: number) =>
+  `${isIPv6(host) ? `[${host}]` : host}:${port}`;
 
 export const wg = {
   generateServerPeer: (
@@ -262,7 +267,7 @@ PublicKey = ${wgInterface.publicKey}
 PresharedKey = ${client.preSharedKey}
 AllowedIPs = ${(client.allowedIps ?? userConfig.defaultAllowedIps).join(', ')}
 PersistentKeepalive = ${client.persistentKeepalive}
-Endpoint = ${userConfig.host}:${userConfig.port}`;
+Endpoint = ${formatEndpoint(userConfig.host, userConfig.port)}`;
   },
 
   generatePrivateKey: () => {

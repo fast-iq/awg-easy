@@ -7,7 +7,8 @@
       "general": "General",
       "config": "Config",
       "interface": "Interface",
-      "hooks": "Hooks"
+      "hooks": "Hooks",
+      "users": "Users"
     }
   },
   "user": {
@@ -117,7 +118,8 @@
     "notConnected": "Client not connected",
     "endpoint": "Endpoint",
     "endpointDesc": "IP of the client from which the AmneziaWG connection is established",
-    "search": "Search clients..."
+    "search": "Search clients...",
+    "exportCsv": "Export CSV"
   },
   "dialog": {
     "change": "Change",
@@ -149,7 +151,12 @@
       "json": "JSON",
       "jsonDesc": "Route for metrics in JSON format",
       "prometheus": "Prometheus",
-      "prometheusDesc": "Route for Prometheus metrics"
+      "prometheusDesc": "Route for Prometheus metrics",
+      "autoDeleteExpired": "Auto-Delete Expired Clients",
+      "autoDeleteExpiredDesc": "Delete expired clients entirely instead of only disabling them",
+      "backup": "Backup",
+      "downloadBackup": "Download Database Backup",
+      "backupDesc": "Download a consistent copy of the entire database (.db). Store it safely: it contains password hashes."
     },
     "config": {
       "connection": "Connection",
@@ -174,7 +181,27 @@
       "restartWarn": "Are you sure to restart the interface? This will disconnect all clients.",
       "restartSuccess": "Interface restarted"
     },
-    "introText": "Welcome to the admin panel.\n\nHere you can manage the general settings, the configuration, the interface settings and the hooks.\n\nStart by choosing one of the sections in the sidebar."
+    "introText": "Welcome to the admin panel.\n\nHere you can manage the general settings, the configuration, the interface settings and the hooks.\n\nStart by choosing one of the sections in the sidebar.",
+    "users": {
+      "username": "Username",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "roleAdmin": "Administrator",
+      "roleClient": "Client",
+      "enabled": "Enabled",
+      "twoFactor": "2FA",
+      "clients": "Clients",
+      "createUser": "Create User",
+      "editUser": "Edit User",
+      "createUserDesc": "Create a new user with a role",
+      "editUserDesc": "Update this user, optionally reset the password",
+      "deleteUser": "Delete User",
+      "deleteUserDesc": "Are you sure you want to delete this user? This cannot be undone.",
+      "newPassword": "New Password",
+      "newPasswordDesc": "Leave empty to keep the current password",
+      "delete": "Delete"
+    }
   },
   "zod": {
     "generic": {

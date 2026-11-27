@@ -13,6 +13,13 @@ export const general = sqliteTable('general_table', {
   metricsJson: int('metrics_json', { mode: 'boolean' }).notNull(),
   metricsPassword: text('metrics_password'),
 
+  // cron: delete expired clients instead of only disabling them
+  autoDeleteExpiredClients: int('auto_delete_expired_clients', {
+    mode: 'boolean',
+  })
+    .notNull()
+    .default(false),
+
   createdAt: text('created_at')
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),

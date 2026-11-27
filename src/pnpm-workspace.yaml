@@ -1,0 +1,17 @@
+# pnpm 12 не читает поле `pnpm` в package.json — настройки здесь.
+overrides:
+  rollup: 4.50.0
+  tar@7.5.1: '>=7.5.21'
+  h3@1.15.4: '>=1.15.6'
+  defu@6.1.4: '>=6.1.7'
+  flatted@3.3.3: '>=3.4.0'
+  ws@8.18.3: '>=8.21.0'
+  koa@2.16.3: '>=2.16.4'
+  source-map-js: ^1.2.2
+# pnpm 11+ по умолчанию 24ч (supply-chain политика) — ломает CI на свежих релизах
+minimumReleaseAge: 0
+allowBuilds:
+  argon2: false
+  esbuild: false
+  vue-demi: false
+  unrs-resolver: false

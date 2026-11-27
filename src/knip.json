@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "include": ["files", "dependencies", "exports", "types"],
+  "ignore": ["i18n/localeDetector.ts"],
+  "ignoreDependencies": ["@vueuse/core", "vue-tsc", "@nuxt/devtools"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreIssues": {
+    "server/utils/Database.ts": ["exports"],
+    "server/utils/WireGuard.ts": ["exports"],
+    "app/utils/types.ts": ["types"],
+    "server/database/repositories/**/types.ts": ["types"]
+  },
+  "workspaces": {
+    ".": {
+      "project": ["{app,server,shared,i18n}/**/*.{ts,vue,css}", "*.{ts,mjs,js}"]
+    }
+  }
+}
