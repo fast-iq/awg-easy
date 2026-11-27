@@ -45,6 +45,7 @@ export default definePermissionEventHandler(
     } else if (body.type === 'create') {
       await Database.users.verifyTotp(user.id, body.code);
 
+      logAudit(event, user, 'user.totp_enabled');
       return {
         success: true,
         type: 'created',
@@ -52,6 +53,7 @@ export default definePermissionEventHandler(
     } else if (body.type === 'delete') {
       await Database.users.deleteTotpKey(user.id, body.currentPassword);
 
+      logAudit(event, user, 'user.totp_disabled');
       return {
         success: true,
         type: 'deleted',

@@ -11,6 +11,11 @@ export default defineEventHandler(async (event) => {
 
   await session.clear();
 
+  const logoutUser = session.data.userId
+    ? await Database.users.get(session.data.userId).catch(() => null)
+    : null;
+  logAudit(event, logoutUser, 'logout');
+
   SERVER_DEBUG(`Deleted Session: ${sessionId}`);
   return { success: true };
 });

@@ -4,11 +4,12 @@ import { createReadStream } from 'node:fs';
 export default definePermissionEventHandler(
   'admin',
   'any',
-  async ({ event }) => {
+  async ({ event, user }) => {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const tmpFile = `/tmp/awg-easy-backup-${stamp}.db`;
     try {
       await Database.backup(tmpFile);
+      logAudit(event, user, 'admin.backup_exported');
       setHeader(
         event,
         'Content-Disposition',

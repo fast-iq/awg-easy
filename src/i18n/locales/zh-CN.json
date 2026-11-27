@@ -8,7 +8,8 @@
       "config": "网络配置",
       "interface": "接口配置",
       "hooks": "钩子脚本",
-      "users": "用户"
+      "users": "用户",
+      "audit": "审计日志"
     }
   },
   "user": {
@@ -197,6 +198,43 @@
       "newPassword": "新密码",
       "newPasswordDesc": "留空则保留当前密码",
       "delete": "删除"
+    },
+    "audit": {
+      "label": "审计日志",
+      "time": "时间",
+      "user": "用户",
+      "action": "操作",
+      "target": "对象",
+      "ip": "IP",
+      "empty": "暂无审计记录",
+      "prev": "上一页",
+      "next": "下一页",
+      "allActions": "全部操作",
+      "actions": {
+        "login": "登录",
+        "login_failed": "登录失败",
+        "logout": "登出",
+        "client_created": "创建客户端",
+        "client_updated": "修改客户端",
+        "client_deleted": "删除客户端",
+        "client_enabled": "启用客户端",
+        "client_disabled": "禁用客户端",
+        "client_otp_link_created": "创建一次性链接",
+        "user_created": "创建用户",
+        "user_updated": "修改用户",
+        "user_deleted": "删除用户",
+        "user_password_changed": "修改密码",
+        "user_totp_enabled": "启用两步验证",
+        "user_totp_disabled": "停用两步验证",
+        "admin_general_updated": "更新常规设置",
+        "admin_interface_updated": "更新接口",
+        "admin_interface_restarted": "重启接口",
+        "admin_cidr_updated": "更新地址池",
+        "admin_hooks_updated": "更新钩子",
+        "admin_config_updated": "更新客户端配置",
+        "admin_backup_exported": "导出数据库备份",
+        "admin_migration_imported": "导入迁移数据"
+      }
     }
   },
   "zod": {

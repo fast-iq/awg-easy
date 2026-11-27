@@ -8,7 +8,8 @@
       "config": "Config",
       "interface": "Interface",
       "hooks": "Hooks",
-      "users": "Users"
+      "users": "Users",
+      "audit": "Audit log"
     }
   },
   "user": {
@@ -201,6 +202,43 @@
       "newPassword": "New Password",
       "newPasswordDesc": "Leave empty to keep the current password",
       "delete": "Delete"
+    },
+    "audit": {
+      "label": "Audit log",
+      "time": "Time",
+      "user": "User",
+      "action": "Action",
+      "target": "Object",
+      "ip": "IP",
+      "empty": "No audit records",
+      "prev": "Previous",
+      "next": "Next",
+      "allActions": "All actions",
+      "actions": {
+        "login": "Signed in",
+        "login_failed": "Failed sign-in",
+        "logout": "Signed out",
+        "client_created": "Client created",
+        "client_updated": "Client updated",
+        "client_deleted": "Client deleted",
+        "client_enabled": "Client enabled",
+        "client_disabled": "Client disabled",
+        "client_otp_link_created": "One-time link created",
+        "user_created": "User created",
+        "user_updated": "User updated",
+        "user_deleted": "User deleted",
+        "user_password_changed": "Password changed",
+        "user_totp_enabled": "2FA enabled",
+        "user_totp_disabled": "2FA disabled",
+        "admin_general_updated": "General settings updated",
+        "admin_interface_updated": "Interface updated",
+        "admin_interface_restarted": "Interface restarted",
+        "admin_cidr_updated": "IP pool updated",
+        "admin_hooks_updated": "Hooks updated",
+        "admin_config_updated": "Client config updated",
+        "admin_backup_exported": "Database backup exported",
+        "admin_migration_imported": "Migration imported"
+      }
     }
   },
   "zod": {

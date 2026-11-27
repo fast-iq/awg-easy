@@ -1,7 +1,7 @@
 export default definePermissionEventHandler(
   'users',
   'create',
-  async ({ event }) => {
+  async ({ event, user }) => {
     const { username, password, role } = await readValidatedBody(
       event,
       validateZod(UserAdminCreateSchema, event)
@@ -19,6 +19,7 @@ export default definePermissionEventHandler(
       throw e;
     }
 
+    logAudit(event, user, 'user.created', username, { role });
     return { success: true };
   }
 );

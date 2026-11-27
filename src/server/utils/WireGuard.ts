@@ -5,6 +5,9 @@ import type { InterfaceType } from '#db/repositories/interface/types';
 
 const WG_DEBUG = debug('WireGuard');
 
+// audit retention runs once a day inside the 60s cron job
+let lastAuditPruneAt = 0;
+
 type DumpEntry = Awaited<ReturnType<typeof wg.dump>>[number];
 
 type ClientWithDump = {
@@ -331,6 +334,13 @@ class WireGuard {
         }
         needsSave = true;
       }
+    }
+    // Audit log retention (once a day; cheap indexed DELETE)
+    if (Date.now() - lastAuditPruneAt > 24 * 60 * 60 * 1000) {
+      lastAuditPruneAt = Date.now();
+      await Database.audit
+        .prune(90)
+        .catch(() => WG_DEBUG('Audit log prune failed.'));
     }
     // One Time Link Feature
     for (const client of clients) {

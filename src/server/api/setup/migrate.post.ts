@@ -76,5 +76,6 @@ export default defineSetupEventHandler('migrate', async ({ event }) => {
   }
 
   await Database.general.setSetupStep(0);
+  logAudit(event, null, 'admin.migration_imported');
   return { success: true };
 });

@@ -39,6 +39,8 @@ export default definePermissionEventHandler(
 
     await Database.users.delete(target.id);
 
+    logAudit(event, user, 'user.deleted', target.username, { userId });
+
     return { success: true };
   }
 );

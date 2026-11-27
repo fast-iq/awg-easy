@@ -15,6 +15,7 @@ import { UserConfigService } from './repositories/userConfig/service';
 import { InterfaceService } from './repositories/interface/service';
 import { HooksService } from './repositories/hooks/service';
 import { OneTimeLinkService } from './repositories/oneTimeLink/service';
+import { AuditService } from './repositories/audit/service';
 import { generateAwgObfuscationParams } from '#utils/awg-params';
 
 const DB_DEBUG = debug('Database');
@@ -49,6 +50,7 @@ class DBService {
   interfaces: InterfaceService;
   hooks: HooksService;
   oneTimeLinks: OneTimeLinkService;
+  audit: AuditService;
 
   constructor(db: DBType) {
     this.clients = new ClientService(db);
@@ -58,6 +60,7 @@ class DBService {
     this.interfaces = new InterfaceService(db);
     this.hooks = new HooksService(db);
     this.oneTimeLinks = new OneTimeLinkService(db);
+    this.audit = new AuditService(db);
   }
 
   /**

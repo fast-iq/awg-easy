@@ -15,6 +15,7 @@ const files = [
   '0000_short_skin.sql',
   '0001_classy_the_stranger.sql',
   '0002_cooing_the_anarchist.sql',
+  '0003_big_purple_man.sql',
 ];
 
 function applyAll() {

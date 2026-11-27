@@ -12,6 +12,8 @@ export default definePermissionEventHandler(
     checkPermissions(user);
 
     await Database.users.updatePassword(user.id, currentPassword, newPassword);
+
+    logAudit(event, user, 'user.password_changed');
     return { success: true };
   }
 );

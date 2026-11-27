@@ -17,6 +17,7 @@ export default definePermissionEventHandler(
     await WireGuard.saveConfig();
 
     const clientId = result[0]!.clientId;
+    logAudit(event, user, 'client.created', name, { clientId });
     return { success: true, clientId };
   }
 );

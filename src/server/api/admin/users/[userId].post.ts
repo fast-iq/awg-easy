@@ -1,7 +1,7 @@
 export default definePermissionEventHandler(
   'users',
   'update',
-  async ({ event }) => {
+  async ({ event, user }) => {
     const { userId } = await getValidatedRouterParams(
       event,
       validateZod(UserAdminIdSchema, event)
@@ -46,6 +46,17 @@ export default definePermissionEventHandler(
     if (data.password) {
       await Database.users.setPassword(userId, data.password);
     }
+
+    logAudit(event, user, 'user.updated', target.username, {
+      userId,
+      fields: [
+        'name',
+        'email',
+        ...(data.role !== target.role ? ['role'] : []),
+        ...(data.enabled !== target.enabled ? ['enabled'] : []),
+        ...(data.password ? ['password'] : []),
+      ],
+    });
 
     return { success: true };
   }

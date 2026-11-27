@@ -8,7 +8,8 @@
       "config": "Конфигурация",
       "interface": "Интерфейс",
       "hooks": "Хуки",
-      "users": "Пользователи"
+      "users": "Пользователи",
+      "audit": "Журнал аудита"
     }
   },
   "user": {
@@ -201,6 +202,43 @@
       "newPassword": "Новый пароль",
       "newPasswordDesc": "Оставьте пустым, чтобы сохранить текущий пароль",
       "delete": "Удалить"
+    },
+    "audit": {
+      "label": "Журнал аудита",
+      "time": "Время",
+      "user": "Пользователь",
+      "action": "Действие",
+      "target": "Объект",
+      "ip": "IP",
+      "empty": "Нет записей аудита",
+      "prev": "Назад",
+      "next": "Вперёд",
+      "allActions": "Все действия",
+      "actions": {
+        "login": "Вход",
+        "login_failed": "Неудачный вход",
+        "logout": "Выход",
+        "client_created": "Клиент создан",
+        "client_updated": "Клиент изменён",
+        "client_deleted": "Клиент удалён",
+        "client_enabled": "Клиент включён",
+        "client_disabled": "Клиент отключён",
+        "client_otp_link_created": "Создана одноразовая ссылка",
+        "user_created": "Пользователь создан",
+        "user_updated": "Пользователь изменён",
+        "user_deleted": "Пользователь удалён",
+        "user_password_changed": "Пароль изменён",
+        "user_totp_enabled": "2FA включена",
+        "user_totp_disabled": "2FA отключена",
+        "admin_general_updated": "Изменены общие настройки",
+        "admin_interface_updated": "Изменён интерфейс",
+        "admin_interface_restarted": "Перезапуск интерфейса",
+        "admin_cidr_updated": "Изменён пул адресов",
+        "admin_hooks_updated": "Изменены хуки",
+        "admin_config_updated": "Изменён конфиг клиентов",
+        "admin_backup_exported": "Экспорт резервной копии",
+        "admin_migration_imported": "Импорт миграции"
+      }
     }
   },
   "zod": {

@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
   if (!result.success) {
     switch (result.error) {
       case 'INCORRECT_CREDENTIALS':
+        logAudit(event, null, 'login_failed', username);
         throw createError({
           statusCode: 401,
           statusMessage: 'Invalid username or password',
@@ -33,8 +34,10 @@ export default defineEventHandler(async (event) => {
       case 'TOTP_REQUIRED':
         return { status: 'TOTP_REQUIRED' };
       case 'INVALID_TOTP_CODE':
+        logAudit(event, null, 'login_failed', username, { reason: 'totp' });
         return { status: 'INVALID_TOTP_CODE' };
       case 'USER_DISABLED':
+        logAudit(event, null, 'login_failed', username, { reason: 'disabled' });
         throw createError({
           statusCode: 401,
           statusMessage: 'User disabled',
@@ -56,7 +59,7 @@ export default defineEventHandler(async (event) => {
     userId: user.id,
   });
 
-  // TODO?: create audit log
+  logAudit(event, user, 'login');
 
   SERVER_DEBUG(`New Session: ${data.id} for ${user.id} (${user.username})`);
 
