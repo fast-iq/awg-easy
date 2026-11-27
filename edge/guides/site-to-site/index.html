@@ -2085,6 +2085,9 @@ ping<span class="w"> </span><span class="m">192</span>.168.1.50<span class="w"> 
 <li>
 <p>Routes are (re)installed automatically on save and on every container/interface start — no manual <code>ip route</code> needed.</p>
 </li>
+<li>
+<p>Single addresses are accepted as well as CIDRs (e.g. <code>192.168.1.50</code> installs a /32 host route); <code>0.0.0.0/0</code> and <code>::/0</code> are rejected on purpose.</p>
+</li>
 </ul>
 
 
