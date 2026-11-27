@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   update-lockfile:
     name: Update pnpm-lock.yaml
