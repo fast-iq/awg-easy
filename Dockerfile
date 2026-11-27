@@ -6,7 +6,7 @@ WORKDIR /app
 
 # update corepack + enable pnpm
 
-RUN npm install --global corepack@latest && corepack enable pnpm
+RUN npm install --global corepack@0.36.0 && corepack enable pnpm
 
 
 
@@ -178,9 +178,9 @@ RUN cd /app/server && \
 
 	if [ ! -d node_modules/vue-router ]; then npm cache clean --force || true; rm -rf node_modules; fi && \
 
-	npm install --no-save --omit=dev --no-audit --no-fund libsql && \
+	npm install --no-save --omit=dev --no-audit --no-fund libsql@0.5.29 && \
 
-	npm install --no-save --omit=dev --no-audit --no-fund vue && \
+	npm install --no-save --omit=dev --no-audit --no-fund vue@3.5.46 && \
 
 	if [ -f package-lock.json ]; then rm package-lock.json; fi && \
 

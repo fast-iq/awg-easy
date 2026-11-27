@@ -127,8 +127,8 @@ jobs:
             echo "Smoke test failed: POST /api/admin/users create -> HTTP $code: $(cat /tmp/smoke-resp.txt)"
             exit 1
           fi
-          users_count=$(curl -sf -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/users \
-            | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+          curl -sf -b /tmp/smoke-cookies.txt -o /tmp/smoke-users.json http://localhost:3000/api/admin/users
+          users_count=$(python3 -c "import json; print(len(json.load(open('/tmp/smoke-users.json'))))")
           if [ "$users_count" != "2" ]; then
             docker logs awg-smoke
             echo "Smoke test failed: expected 2 users, got $users_count"
