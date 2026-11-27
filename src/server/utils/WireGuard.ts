@@ -175,7 +175,7 @@ class WireGuard {
   /**
    * Merge `wg show dump` data into clients and sort by name.
    */
-  async #attachDump<T extends { name: string; publicKey: string }>(
+  async #attachDump<T extends { id: number; name: string; publicKey: string }>(
     wgInterface: InterfaceType,
     dbClients: T[],
     sort?: 'asc' | 'desc'
