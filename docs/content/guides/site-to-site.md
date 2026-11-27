@@ -75,3 +75,5 @@ Split-tunnel clients need the LAN subnet added to their **Allowed IPs** explicit
     ```
 
 - Routes are (re)installed automatically on save and on every container/interface start — no manual `ip route` needed.
+
+- Single addresses are accepted as well as CIDRs (e.g. `192.168.1.50` installs a /32 host route); `0.0.0.0/0` and `::/0` are rejected on purpose.
