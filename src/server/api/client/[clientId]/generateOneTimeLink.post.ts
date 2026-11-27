@@ -1,26 +1,11 @@
-import { ClientGetSchema } from '#db/repositories/client/types';
-
 export default definePermissionEventHandler(
   'clients',
   'update',
   async ({ event, checkPermissions }) => {
-    const { clientId } = await getValidatedRouterParams(
-      event,
-      validateZod(ClientGetSchema, event)
-    );
+    const client = await getAuthorizedClient(event, checkPermissions);
 
-    const client = await Database.clients.get(clientId);
+    await Database.oneTimeLinks.generate(client.id);
 
-    if (!client) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Client not found',
-      });
-    }
-
-    checkPermissions(client);
-
-    await Database.oneTimeLinks.generate(clientId);
     return { success: true };
   }
 );

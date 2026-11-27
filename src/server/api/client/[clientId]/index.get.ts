@@ -1,24 +1,8 @@
-import { ClientGetSchema } from '#db/repositories/client/types';
-
 export default definePermissionEventHandler(
   'clients',
   'view',
   async ({ event, checkPermissions }) => {
-    const { clientId } = await getValidatedRouterParams(
-      event,
-      validateZod(ClientGetSchema, event)
-    );
-
-    const result = await Database.clients.get(clientId);
-
-    if (!result) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Client not found',
-      });
-    }
-
-    checkPermissions(result);
+    const result = await getAuthorizedClient(event, checkPermissions);
 
     // data can be undefined if the client is disabled
     const data = await WireGuard.dumpByPublicKey(result.publicKey);

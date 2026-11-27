@@ -85,6 +85,10 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
+          # explicit trivy binary version: the action's built-in default
+          # (v0.70.0) can no longer be resolved upstream (tag gone), and the
+          # install step hard-fails on it
+          version: v0.76.2
           image-ref: awg-easy:ci
           format: table
           exit-code: "1"
@@ -116,7 +120,7 @@ jobs:
           file: Dockerfile
           tags: awg-easy:ci
           load: true
-          cache-from: type:local,src=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache
       - name: Run dockle
         run: |
           # dockle audits image CONFIG (Trivy covers CVEs): secrets in layers,
@@ -153,11 +157,15 @@ jobs:
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        # trivy instead of anchore/sbom-action: syft's version resolver kept
+        # failing on GitHub releases API (504 + "unable to find tag").
+        # Same tool/version as the CVE job, one less external dependency.
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image: awg-easy:ci
-          output: sbom.cdx.json
+          version: v0.76.2
+          image-ref: awg-easy:ci
           format: cyclonedx
+          output: sbom.cdx.json
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:

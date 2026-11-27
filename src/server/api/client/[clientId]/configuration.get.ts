@@ -1,30 +1,17 @@
-import { ClientGetSchema } from '#db/repositories/client/types';
-
 export default definePermissionEventHandler(
   'clients',
   'view',
   async ({ event, checkPermissions }) => {
-    const { clientId } = await getValidatedRouterParams(
-      event,
-      validateZod(ClientGetSchema, event)
-    );
-    const client = await Database.clients.get(clientId);
+    const client = await getAuthorizedClient(event, checkPermissions);
 
-    if (!client) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Client not found',
-      });
-    }
-
-    checkPermissions(client);
-
-    const config = await WireGuard.getClientConfiguration({ clientId });
+    const config = await WireGuard.getClientConfiguration({
+      clientId: client.id,
+    });
 
     setHeader(
       event,
       'Content-Disposition',
-      `attachment; filename="${WireGuard.cleanClientFilename(client.name) || clientId}.conf"`
+      `attachment; filename="${WireGuard.cleanClientFilename(client.name) || client.id}.conf"`
     );
 
     setHeader(event, 'Content-Type', 'text/plain');
