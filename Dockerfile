@@ -1,4 +1,4 @@
-FROM docker.io/library/node:24-alpine AS build
+FROM docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS build
 
 WORKDIR /app
 
@@ -42,7 +42,7 @@ RUN apk add --no-cache linux-headers build-base git && \
 
 # Build amneziawg kernel module for Alpine linux-lts kernel (6.12.50)
 
-FROM alpine:3.22 AS kernel_module_builder
+FROM alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f AS kernel_module_builder
 
 WORKDIR /build
 
@@ -118,7 +118,7 @@ RUN mkdir -p /build/module && \
 
 # module is unavailable, e.g. non-Alpine hosts)
 
-FROM --platform=$BUILDPLATFORM docker.io/library/golang:alpine AS amneziawg_go_builder
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 AS amneziawg_go_builder
 
 ARG TARGETARCH
 
@@ -140,7 +140,7 @@ RUN git clone --depth=1 https://github.com/amnezia-vpn/amneziawg-go.git /build &
 
 # This saves a lot of disk space.
 
-FROM docker.io/library/node:24-alpine
+FROM docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
 
 WORKDIR /app
 
