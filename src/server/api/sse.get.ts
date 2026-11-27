@@ -51,6 +51,29 @@ export default definePermissionEventHandler(
     setHeader(event, 'Cache-Control', 'no-cache');
     setHeader(event, 'X-Accel-Buffering', 'no');
 
-    return stream;
+    // Flush headers right away with an SSE comment preamble. Without this,
+    // the response stays unflushed until the first client snapshot succeeds
+    // — and while the WireGuard interface is still starting (or failed to
+    // start), `wg show` throws, no chunk is ever enqueued, and clients /
+    // health probes never observe the stream as connected. EventSource
+    // ignores comment lines, so the data protocol is unchanged.
+    const reader = stream.getReader();
+    return new ReadableStream({
+      async start(controller) {
+        controller.enqueue(encoder.encode(': connected\n\n'));
+      },
+      async pull(controller) {
+        try {
+          const { done, value } = await reader.read();
+          if (done) controller.close();
+          else if (value) controller.enqueue(value);
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+      cancel(reason) {
+        return reader.cancel(reason);
+      },
+    });
   }
 );
