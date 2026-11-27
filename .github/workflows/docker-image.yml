@@ -82,21 +82,22 @@ jobs:
           tags: awg-easy:ci
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
+      - name: Install Trivy
+        run: |
+          # Direct release download instead of trivy-action: its setup-trivy
+          # installer resolves the binary version via anonymous api.github.com
+          # calls, which get rate-limited from shared runner IPs and fail as
+          # bogus "unable to find tag 'vX.Y.Z'" even when the tag exists.
+          # Release downloads are not API-rate-limited.
+          mkdir -p "$HOME/.local/bin"
+          curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz | tar -xz -C "$HOME/.local/bin" trivy
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          # explicit trivy binary version: the action's built-in default
-          # (v0.70.0) can no longer be resolved upstream (tag gone), and the
-          # install step hard-fails on it
-          version: v0.76.2
-          image-ref: awg-easy:ci
-          format: table
-          exit-code: "1"
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          # CVEs in npm's internal node_modules (base image, not fixable via pnpm)
-          # and drizzle-orm 0.44.7 (0.45 is potentially breaking, tracked separately)
-          trivyignores: .trivyignore
+        run: |
+          # CVE gate: CRITICAL/HIGH block; unfixed-in-distro CVEs don't
+          # (alpine/npm packages get patched with delay — see .trivyignore)
+          trivy image --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 \
+            --ignorefile .trivyignore awg-easy:ci
 
   dockle:
     name: Image hardening audit (dockle)
@@ -125,13 +126,17 @@ jobs:
         run: |
           # dockle audits image CONFIG (Trivy covers CVEs): secrets in layers,
           # :latest tags, port 22, root user, etc.
-          # DKL-D1024 (no USER directive) is accepted on purpose: the app must
-          # manage WireGuard devices; privilege restrictions are applied at
-          # `docker run` time (cap_add/drop in docker-compose.yml).
+          # CIS-DI-0001/DKL-D1024 (no USER directive) is accepted on purpose:
+          # the app must manage WireGuard devices; privilege restrictions are
+          # applied at `docker run` time (cap_add/drop in docker-compose.yml).
+          # NoEmptyContinuation: blank lines inside multi-line RUN blocks in
+          # the Dockerfile are comment separators, not bugs.
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             docker.io/goodwithtech/dockle:v0.4.15 \
-            --exit-code 1 --exit-level warn --accept-key DKL-D1024 awg-easy:ci
+            --exit-code 1 --exit-level warn \
+            --accept-key DKL-D1024 --accept-key CIS-DI-0001 --accept-key NoEmptyContinuation \
+            awg-easy:ci
 
   sbom:
     name: Generate SBOM
@@ -156,16 +161,16 @@ jobs:
           tags: awg-easy:ci
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
+      - name: Install Trivy
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz | tar -xz -C "$HOME/.local/bin" trivy
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Generate SBOM
         # trivy instead of anchore/sbom-action: syft's version resolver kept
         # failing on GitHub releases API (504 + "unable to find tag").
         # Same tool/version as the CVE job, one less external dependency.
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          version: v0.76.2
-          image-ref: awg-easy:ci
-          format: cyclonedx
-          output: sbom.cdx.json
+        run: trivy image --format cyclonedx --output sbom.cdx.json awg-easy:ci
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
