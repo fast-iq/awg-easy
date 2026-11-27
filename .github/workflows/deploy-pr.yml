@@ -206,7 +206,7 @@ jobs:
           # first triaged baseline had FAIL=0; gate now blocks on High+)
           docker run --rm --network host \
             -v "$PWD/zap-out:/zap/wrk:rw" \
-            docker.io/zaproxy/zap-stable:latest \
+            docker.io/zaproxy/zap-stable@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af \
             zap-baseline.py -t http://localhost:3000 -m zap-report.md -I
           ls -la zap-out/
 
