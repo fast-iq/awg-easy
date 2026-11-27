@@ -59,14 +59,124 @@ jobs:
       - name: Smoke test
         if: matrix.arch.platform == 'linux/amd64'
         run: |
-          docker run -d --name awg-smoke -p 3000:3000 ghcr.io/fast-iq/awg-easy:pr
+          # INSECURE=true: session cookie without the Secure flag so curl
+          # over plain http in CI can send it back (matches install.sh)
+          docker run -d --name awg-smoke -p 3000:3000 -e INSECURE=true ghcr.io/fast-iq/awg-easy:pr
+
+          # 1) server responds (static health)
+          ok=0
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3000/api/information > /dev/null; then
-              echo "Smoke test passed"
-              exit 0
+              echo "Server responds on /api/information"
+              ok=1
+              break
             fi
             sleep 2
           done
-          docker logs awg-smoke
-          echo "Smoke test failed: server did not respond within 60s"
-          exit 1
+          if [ "$ok" != "1" ]; then
+            docker logs awg-smoke
+            echo "Smoke test failed: server did not respond within 60s"
+            exit 1
+          fi
+
+          # 2) authenticated path: setup admin -> login -> DB-backed endpoints
+          #    (catches broken migrations/Database proxy/repo regressions that
+          #     used to pass the old static smoke test — see AGENTS p.45-47)
+          curl -sf -X POST http://localhost:3000/api/setup/2 \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"smoketest","password":"smoke-test-password-1","confirmPassword":"smoke-test-password-1"}' \
+            || { docker logs awg-smoke; echo "Smoke test failed: POST /api/setup/2"; exit 1; }
+
+          curl -sf -c /tmp/smoke-cookies.txt -X POST http://localhost:3000/api/session \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"smoketest","password":"smoke-test-password-1","remember":false}' \
+            || { docker logs awg-smoke; echo "Smoke test failed: POST /api/session login"; exit 1; }
+
+          curl -sf -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/users > /dev/null \
+            || { docker logs awg-smoke; echo "Smoke test failed: GET /api/admin/users with session"; exit 1; }
+
+          # 3) admin CRUD + DB-backed surfaces (users, general config, backup, SSE)
+          curl -sf -X POST http://localhost:3000/api/admin/users \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"ci-viewer","password":"ci-viewer-password-1","role":2}' > /dev/null \
+            || { docker logs awg-smoke; echo "Smoke test failed: POST /api/admin/users create"; exit 1; }
+          users_count=$(curl -sf -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/users \
+            | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+          if [ "$users_count" != "2" ]; then
+            docker logs awg-smoke
+            echo "Smoke test failed: expected 2 users, got $users_count"
+            exit 1
+          fi
+
+          # general config round-trip (schema + zod + sqlite)
+          curl -sf -X POST http://localhost:3000/api/admin/general \
+            -H 'Content-Type: application/json' \
+            -d '{"sessionTimeout":3600,"metricsPrometheus":false,"metricsJson":false,"metricsPassword":null,"autoDeleteExpiredClients":true}' > /dev/null \
+            || { docker logs awg-smoke; echo "Smoke test failed: POST /api/admin/general"; exit 1; }
+          curl -sf -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/general \
+            | grep -q '"autoDeleteExpiredClients":true' \
+            || { docker logs awg-smoke; echo "Smoke test failed: autoDeleteExpiredClients not persisted"; exit 1; }
+
+          # DB backup must download as a real SQLite file (VACUUM INTO path)
+          curl -sf -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/backup -o /tmp/smoke-backup.db \
+            || { docker logs awg-smoke; echo "Smoke test failed: GET /api/admin/backup"; exit 1; }
+          head -c 15 /tmp/smoke-backup.db | grep -q 'SQLite format 3' \
+            || { docker logs awg-smoke; echo "Smoke test failed: backup is not a SQLite file"; exit 1; }
+
+          # SSE endpoint must respond as an event stream (auth-gated separately below)
+          sse_headers=$(curl -s -m 3 -D - -o /dev/null -b /tmp/smoke-cookies.txt http://localhost:3000/api/sse || true)
+          echo "$sse_headers" | grep -qi 'content-type: text/event-stream' \
+            || { docker logs awg-smoke; echo "Smoke test failed: /api/sse not an event stream"; exit 1; }
+
+          # 4) unauthenticated API must be gated
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/client)
+          if [ "$code" != "401" ]; then
+            docker logs awg-smoke
+            echo "Smoke test failed: GET /api/client unauthenticated returned $code, expected 401"
+            exit 1
+          fi
+
+          # 5) logout must expire the session cookie in the response
+          #    (h3 sessions are sealed cookies — the jar itself must lose it)
+          curl -sf -b /tmp/smoke-cookies.txt -c /tmp/smoke-cookies.txt \
+            -X DELETE http://localhost:3000/api/session > /dev/null \
+            || { docker logs awg-smoke; echo "Smoke test failed: DELETE /api/session"; exit 1; }
+          code=$(curl -s -o /dev/null -w '%{http_code}' -b /tmp/smoke-cookies.txt http://localhost:3000/api/admin/users)
+          if [ "$code" != "401" ]; then
+            docker logs awg-smoke
+            echo "Smoke test failed: after logout GET /api/admin/users returned $code, expected 401"
+            exit 1
+          fi
+
+          echo "Smoke test passed (health + setup + login + CRUD + config + backup + SSE + auth gate + logout)"
+
+      - name: OWASP ZAP baseline scan
+        if: matrix.arch.platform == 'linux/amd64' && always()
+        continue-on-error: true # first pass: collect the report, tighten to blocking once triaged
+        run: |
+          # reuse the smoke container if it is up, otherwise start a fresh one
+          if ! curl -sf http://localhost:3000/api/information > /dev/null; then
+            docker start awg-smoke 2>/dev/null || \
+              docker run -d --name awg-smoke -p 3000:3000 -e INSECURE=true ghcr.io/fast-iq/awg-easy:pr
+            for i in $(seq 1 30); do
+              curl -sf http://localhost:3000/api/information > /dev/null && break
+              sleep 2
+            done
+          fi
+          mkdir -p zap-out
+          # host networking so ZAP reaches localhost:3000; -I: never fail on
+          # warnings, Medium+ findings go to the report artifact for triage
+          docker run --rm --network host \
+            -v "$PWD/zap-out:/zap/wrk:rw" \
+            docker.io/zaproxy/zap-stable:latest \
+            zap-baseline.py -t http://localhost:3000 -r zap-report.md -I
+          ls -la zap-out/
+
+      - name: Upload ZAP report
+        if: matrix.arch.platform == 'linux/amd64' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: zap-out/zap-report.md
+          if-no-files-found: warn
+          retention-days: 14

@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        command: ["lint", "typecheck", "format:check"]
+        command: ["lint", "typecheck", "format:check", "test"]
 
     steps:
       - name: Checkout repository
@@ -69,6 +69,37 @@ jobs:
           cd src
           pnpm install --no-frozen-lockfile
           pnpm ${{ matrix.command }}
+
+  knip:
+    name: Knip (unused code/deps)
+    runs-on: ubuntu-latest
+    needs: docs
+    # non-blocking: knip на nuxt-autoimport даёт ложные срабатывания на новых файлах —
+    # job лишь подсвечивает проблемы (см. src/knip.json с baseline ignoreIssues)
+    continue-on-error: true
+    if: github.repository_owner == 'fast-iq'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4.4.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          check-latest: true
+          cache: "pnpm"
+
+      - name: pnpm knip
+        run: |
+          cd src
+          pnpm install --no-frozen-lockfile
+          pnpm knip
 
   security-audit:
     name: Security Audit
