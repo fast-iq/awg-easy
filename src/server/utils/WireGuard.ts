@@ -186,10 +186,24 @@ class WireGuard {
       endpoint: null as string | null,
       transferRx: null as number | null,
       transferTx: null as number | null,
+      transferTodayTx: 0,
+      transferTodayRx: 0,
     }));
 
     const dump = await wg.dump(wgInterface.name);
     applyDumpToClients(clients, dump);
+
+    // today's persisted traffic totals (UTC day), merged per client
+    const todayDate = new Date().toISOString().slice(0, 10);
+    const todayRows = await Database.traffic
+      .listByDate(todayDate)
+      .catch(() => []);
+    const todayMap = new Map(todayRows.map((row) => [row.clientId, row]));
+    for (const client of clients) {
+      const row = todayMap.get(client.id as number);
+      client.transferTodayTx = row?.tx ?? 0;
+      client.transferTodayRx = row?.rx ?? 0;
+    }
 
     clients.sort((a, b) =>
       sort === 'desc'
@@ -341,8 +355,32 @@ class WireGuard {
       await Database.audit
         .prune(90)
         .catch(() => WG_DEBUG('Audit log prune failed.'));
+      await Database.traffic
+        .prune(365)
+        .catch(() => WG_DEBUG('Traffic history prune failed.'));
       // daily registry block check for the server IP (fire-and-forget)
       blockMonitorDailyTick();
+    }
+    // Traffic sampling: accumulate kernel counter deltas into traffic_daily
+    try {
+      const wgInterface = await Database.interfaces.get();
+      const dump = await wg.dump(wgInterface.name);
+      const publicKeyToId = new Map(
+        clients.map((client) => [client.publicKey, client.id])
+      );
+      const samples = dump.flatMap((entry) => {
+        const clientId = publicKeyToId.get(entry.publicKey);
+        return clientId === undefined
+          ? []
+          : [{ clientId, tx: entry.transferTx, rx: entry.transferRx }];
+      });
+      await Database.traffic.accumulate(
+        samples,
+        new Date().toISOString().slice(0, 10)
+      );
+    } catch (err) {
+      WG_DEBUG('Traffic sampling failed.');
+      console.error(err);
     }
     // One Time Link Feature
     for (const client of clients) {

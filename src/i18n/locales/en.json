@@ -120,7 +120,16 @@
     "endpoint": "Endpoint",
     "endpointDesc": "IP of the client from which the AmneziaWG connection is established",
     "search": "Search clients...",
-    "exportCsv": "Export CSV"
+    "exportCsv": "Export CSV",
+    "today": "Today",
+    "download": "Download",
+    "upload": "Upload",
+    "trafficHistory": "Traffic",
+    "trafficDesc": "Daily totals, stored server-side (UTC days)",
+    "trafficEmpty": "No traffic recorded yet",
+    "trafficToday": "Today (↓ / ↑)",
+    "trafficPeriod": "Last 30 days (↓ / ↑)",
+    "trafficAllTime": "All time (↓ / ↑)"
   },
   "dialog": {
     "change": "Change",

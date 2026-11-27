@@ -112,6 +112,14 @@
             />
           </FormGroup>
           <FormGroup>
+            <FormHeading :description="$t('client.trafficDesc')">
+              {{ $t('client.trafficHistory') }}
+            </FormHeading>
+            <div class="col-span-2">
+              <ClientCardTraffic :client-id="id" />
+            </div>
+          </FormGroup>
+          <FormGroup>
             <FormHeading>{{ $t('form.actions') }}</FormHeading>
             <FormPrimaryActionField type="submit" :label="$t('form.save')" />
             <FormSecondaryActionField

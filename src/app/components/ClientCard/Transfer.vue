@@ -14,6 +14,13 @@
         <br /><span class="font-regular" style="font-size: 0.85em">{{
           bytes(client.transferTx)
         }}</span>
+        <br /><span
+          v-if="client.transferTodayTx"
+          class="text-gray-500 dark:text-neutral-400"
+          style="font-size: 0.8em"
+          :title="$t('client.totalDownload') + bytes(client.transferTx)"
+          >{{ $t('client.today') }} {{ bytes(client.transferTodayTx) }}</span
+        >
       </div>
     </span>
   </div>
@@ -33,6 +40,12 @@
         <br /><span class="font-regular" style="font-size: 0.85em">{{
           bytes(client.transferRx)
         }}</span>
+        <br /><span
+          v-if="client.transferTodayRx"
+          class="text-gray-500 dark:text-neutral-400"
+          style="font-size: 0.8em"
+          >{{ $t('client.today') }} {{ bytes(client.transferTodayRx) }}</span
+        >
       </div>
     </span>
   </div>

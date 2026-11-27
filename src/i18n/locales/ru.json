@@ -120,7 +120,16 @@
     "endpoint": "Конечная точка",
     "endpointDesc": "IP-адрес клиента, с которого установлено соединение AmneziaWG",
     "search": "Поиск клиентов...",
-    "exportCsv": "Экспорт CSV"
+    "exportCsv": "Экспорт CSV",
+    "today": "Сегодня",
+    "download": "Скачано",
+    "upload": "Загружено",
+    "trafficHistory": "Трафик",
+    "trafficDesc": "Суточные итоги, хранятся на сервере (дни по UTC)",
+    "trafficEmpty": "Трафик пока не зафиксирован",
+    "trafficToday": "Сегодня (↓ / ↑)",
+    "trafficPeriod": "Последние 30 дней (↓ / ↑)",
+    "trafficAllTime": "За всё время (↓ / ↑)"
   },
   "dialog": {
     "change": "Изменить",
