@@ -4,37 +4,51 @@ on:
   pull_request:
 
 permissions:
-  # contents: write is required by the dependency-graph snapshot submission API
-  contents: write
-  pull-requests: read
+  contents: read
 
 jobs:
+  # GitHub's JS detector does not parse pnpm v10 lockfiles, so the
+  # dependency graph would be empty and the review below useless without
+  # explicit snapshots. Isolated job — the snapshot API is the only thing
+  # that needs contents:write (AGENTS p.114).
+  dependency-snapshot:
+    name: Submit Dependency Snapshots
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'fast-iq' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Submit head and base snapshots
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha}}
+          GITHUB_REF: refs/pull/${{ github.event.pull_request.number}}/merge
+          GITHUB_API_URL: ${{ github.api_url}}
+        run: |
+          python3 .github/scripts/dep_snapshot.py "$GITHUB_API_URL" "$GITHUB_REPOSITORY" src/package.json src/pnpm-lock.yaml
+          GITHUB_HEAD_SHA="${{ github.event.pull_request.base.sha}}" \
+          GITHUB_REF="refs/heads/${{ github.event.pull_request.base.ref}}" \
+          python3 .github/scripts/dep_snapshot.py "$GITHUB_API_URL" "$GITHUB_REPOSITORY" src/package.json src/pnpm-lock.yaml
+
   dependency-review:
     name: Review dependencies
     runs-on: ubuntu-latest
+    needs: dependency-snapshot
     if: github.repository_owner == 'fast-iq'
+    permissions:
+      contents: read
+      pull-requests: read
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-
-      # GitHub's JS detector does not parse pnpm v10 lockfiles, so the
-      # dependency graph would be empty and this review useless without
-      # explicit snapshots. Submit head + base snapshots first.
-      - name: Submit dependency snapshots
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          GITHUB_REF: refs/pull/${{ github.event.pull_request.number }}/merge
-          GITHUB_API_URL: ${{ github.api_url }}
-        run: |
-          python3 .github/scripts/dep_snapshot.py "$GITHUB_API_URL" "$GITHUB_REPOSITORY" src/package.json src/pnpm-lock.yaml
-          GITHUB_HEAD_SHA="${{ github.event.pull_request.base.sha }}" \
-          GITHUB_REF="refs/heads/${{ github.event.pull_request.base.ref }}" \
-          python3 .github/scripts/dep_snapshot.py "$GITHUB_API_URL" "$GITHUB_REPOSITORY" src/package.json src/pnpm-lock.yaml
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Run Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
         with:
           fail-on-severity: high
           base: main

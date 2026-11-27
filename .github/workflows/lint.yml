@@ -17,15 +17,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         name: Install pnpm
         with:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           check-latest: true
@@ -50,15 +50,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         name: Install pnpm
         with:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           check-latest: true
@@ -81,15 +81,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         name: Install pnpm
         with:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           check-latest: true
@@ -106,21 +106,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: docs
     if: github.repository_owner == 'fast-iq'
-    # contents: write: dependency-graph snapshot submission API
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         name: Install pnpm
         with:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           check-latest: true
@@ -137,11 +136,23 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm audit --audit-level=critical
 
-      # keep GitHub's Dependency Graph current for Dependabot alerts and
-      # Dependency Review (GitHub's JS detector does not parse pnpm v10
-      # lockfiles, so without this the graph stays empty)
+  # keep GitHub's Dependency Graph current for Dependabot alerts and
+  # Dependency Review (GitHub's JS detector does not parse pnpm v10
+  # lockfiles, so without this the graph stays empty). Isolated job: the
+  # snapshot submission API is the ONLY thing here that needs contents:write
+  # (AGENTS p.114) — everything else runs contents:read.
+  dependency-snapshot:
+    name: Submit Dependency Snapshot
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'fast-iq' && github.event_name == 'push'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
       - name: Submit dependency graph snapshot
-        if: github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 .github/scripts/dep_snapshot.py "${GITHUB_API_URL:-https://api.github.com}" "$GITHUB_REPOSITORY" src/package.json src/pnpm-lock.yaml
